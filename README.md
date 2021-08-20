@@ -9,28 +9,36 @@ The data involved is primarily scraped OpenGraph metadata from websites used to 
 
 __Entries__
 
-| id | title | description | image | resource | rank | order | repo_id |
---- | --- | --- | --- | --- | --- | --- | --- 
-| PK | Text | Text, Nullable | Text, Nullable | Text | Integer, Nullable | Integer, Nullable | FK(repo.id), OD=Cascade |
+| id | title | description | image | url | entry_type | rating | sequence | repo_access_key |
+--- | --- | --- | --- | --- | --- | --- | --- | ---
+| PK | Text | Text, Nullable | Text, Nullable | Text | enum default='url' | Integer, Nullable | Integer, Nullable | Text FK(repo.access_key), OD=Cascade |
 
+entry_type refers to an enumerated type that defines how the entry is styled. By default, most entries will be simple links styled similar to twitter/facebook link cards. However, a user may opt to style an entry like a horizontal ruler, or a header, or a text box, to better organize their repo.
+
+rating refers to a user defined rating of a particular entry. Users may increase or decrease the rating of an entry to signify its importance.
+
+sequence refers to what position the entry will appear at in the list when viewing the repo. E.g. 0 will show up on top, then 1, etc. 
 
 __Repo__
 
-| id | owner_key | viewer_key | title | description |
---- | --- | --- | --- | --- 
-| PK | Text, Unique | Text, Unique | Text, Nullable | Text, Nullable |
+access_key | passphrase | title | description |
+--- | --- | --- | --- 
+| Text, PK | Text | Text, Nullable | Text, Nullable |
+
+The access_key is a hash of a random seed generated for each repo, it serves as the primary key in the database and as the resource identifier in url routes.
+The passphrase is a an encrypted, salted hash. Viewers of a repo must enter the passphrase before being given editing priviledges.
 
 ## User Flow
 
-User accesses the landing page. Here they see the option to create a new repo, input an access key to be redirected to an existing repo, or if cookies are enabled, see a list of their repos.
+User accesses the landing page. Here they see the option to create a new repo, input an access key to be redirected to an existing repo, or if cookies are enabled, see a list of their created repos.
 
 ### Create new repo
-A form is brought up, prompting the user to input a title and description for their repository. On a validated submission, they are brought to their new, empty repo with owner access. On first viewing, their owner access key is highlighted.
+A form is brought up, prompting the user to create a passphrase for editing priviledges on their repository. The user can opt for a randomly generated passphrase. The passphrase field is displayed as plain text but is encrpyted on the DB. The user is notified to save their passphrase as there is no way to retrieve it. Entering a title and description for their repository is optional. On a validated submission, they are brought to their new, empty repo with editing access. On first viewing, their access key is highlighted.
 
 ### Repo View
-The list of entries appears on the left side of the screen. Title and description of the repo is on the right side.
+The list of entries appears on the left side of the screen. Title, description, search and editing options for the repo are displayed on the right side.
 
-__(Owner Only)__
+__(Authorized Only - Editing View)__
 On the right side, a panel for auto-sorting by title/description/site name/rating. A button to add a new entry. A toggle for link thumbnails.
 Next to each entry, ability to manually adjust the order of each entry (higher/lower on list). On each entry, buttons to edit/delete that entry, and increase/decrease it’s rank.
 A button to commit all changes (ordering and new entries will be saved to the database)
@@ -43,4 +51,4 @@ API issues - Free request limit of 100/month is pretty limited for the productio
 
 At this stage, there is not much sensitive information being stored. It may be on the table of creating user accounts, so that owner and viewer keys may be easily viewed or renamed. In which case, emails and passwords will need to be protected, with the latter obviously being hashed.
 
-Stretch Goal: Allow users to import/export text with markdown to auto-populate their repo.
+Stretch Goal: Allow users to import/export text with markdown to auto-populate their repo. Account creation and authorization, logged in users automatically have editing privileges for their repos without needing to input the repo's passphrase.

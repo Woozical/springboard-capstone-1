@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if repo.title %}
+        {{repo.title}}
+    {% else %}
+        THIS WILL BE FIRST ENTRY TITLE OR URL
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<h1>Repo view</h1>
+<p>Here's where the links live</p>
+{% endblock %}

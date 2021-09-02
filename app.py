@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect
-from models import db, connect_db
+from models import db, connect_db, Repo, Entry
 from scrape import get_tags
 
 app = Flask(__name__)
@@ -17,4 +17,9 @@ db.create_all()
 
 @app.route('/')
 def home_view():
-    return render_template('base.html')
+    return render_template('home.html')
+
+@app.route('/repo/<access_key>')
+def repo_view(access_key):
+    repo = Repo.query.get_or_404(access_key)
+    return render_template('repo.html', repo=repo)

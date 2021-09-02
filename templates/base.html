@@ -4,23 +4,10 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-    <h1>Hello world</h1>
-    <form action="/entry/new" method="POST">
-        <label for="new-link">Enter a link below:</label> <br>
-        <input type="text" id="new-link" name="link">
-        <button>Submit</button>
-    </form>
-
-    {% if result %}
-    <br>
-    <div style='border: 1px solid black; background-color: grey; width: 50vw;'>
-        <h2>{{result['title']}}</h3>
-        <img src="{{result['image']}}" alt="no-img" width=200 height=200>
-        <p>{{result['description']}}</p>
-    </div>
-    {% endif %}
+    {% block content %}
+    {% endblock %}
 </body>
 </html>

@@ -1,7 +1,10 @@
 import enum
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from utils import generate_access_key
 
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 class EntryType(enum.Enum):
     link = 1
@@ -15,6 +18,17 @@ class Repo(db.Model):
     pass_phrase = db.Column(db.Text, nullable=False)
     title = db.Column(db.String(100))
     description = db.Column(db.String(300))
+
+    @classmethod
+    def create(cls, pass_phrase, title=None, description=None):
+        hashed_pw = bcrypt.generate_password_hash(pass_phrase).decode('utf-8')
+        access_key = generate_access_key()
+        return cls(title=title, description=description, pass_phrase=hashed_pw, access_key=access_key)
+    
+    @classmethod
+    def authenticate(cls, access_key, pass_phrase):
+        repo = cls.query.get(access_key)
+        return repo and bcrypt.check_password_hash(repo.pass_phrase, pass_phrase)
 
 
 class Entry(db.Model):

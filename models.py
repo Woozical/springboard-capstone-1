@@ -1,6 +1,7 @@
 import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from sqlalchemy.orm import backref
 from utils import generate_access_key
 from datetime import datetime
 
@@ -12,6 +13,17 @@ class EntryType(enum.Enum):
     text_box = 2
     divider = 3
 
+    @classmethod
+    def type_to_string(cls, type):
+        if type == cls.link:
+            return 'link'
+        elif type == cls.text_box:
+            return 'text_box'
+        elif type == cls.divider:
+            return 'divider'
+        else:
+            raise TypeError
+
 class Repo(db.Model):
     __tablename__ = 'repos'
     ## Columns
@@ -21,6 +33,9 @@ class Repo(db.Model):
     description = db.Column(db.String(300))
     is_private = db.Column(db.Boolean, nullable=False, default=False)
     last_visited = db.Column(db.Date, nullable=False, default=datetime.now)
+
+    ## Relationships
+    entries = db.relationship('Entry', backref='repo', cascade='delete')
 
     @classmethod
     def create(cls, pass_phrase, title=None, description=None, is_private=None):
@@ -32,6 +47,23 @@ class Repo(db.Model):
     def authenticate(cls, access_key, pass_phrase):
         repo = cls.query.get(access_key)
         return repo and bcrypt.check_password_hash(repo.pass_phrase, pass_phrase)
+    
+    def update_last_visited(self):
+        self.last_visited = datetime.now()
+
+    def to_json(self):
+        entries = []
+        for entry in self.entries:
+            entries.append(entry.to_json())
+
+        return {
+            "access_key" : self.access_key,
+            "title" : self.title,
+            "description" : self.description,
+            "is_private" : self.is_private,
+            "last_visisted" : self.last_visited,
+            "entries" : entries
+        }
 
 
 class Entry(db.Model):
@@ -46,6 +78,24 @@ class Entry(db.Model):
     rating = db.Column(db.Integer)
     sequence = db.Column(db.Integer)
     repo_access_key = db.Column(db.Text, db.ForeignKey('repos.access_key', ondelete="CASCADE"), nullable=False)
+
+    type_to_string = {
+        EntryType.link : 'link',
+        EntryType.divider : 'divider',
+        EntryType.text_box : 'text_box'
+    }
+
+    def to_json(self):
+        return {
+            "id" : self.id,
+            "title" : self.title,
+            "description" : self.description,
+            "image" : self.image,
+            "url" : self.url,
+            "entry_type" : Entry.type_to_string[self.entry_type],
+            "rating" : self.rating,
+            "sequence" : self.sequence,
+        }
 
 def connect_db(flask_app):
     """Connects database to Flask app, import and call in app.py"""

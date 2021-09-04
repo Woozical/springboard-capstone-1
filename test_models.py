@@ -2,6 +2,7 @@ import os
 from unittest import TestCase
 from sqlalchemy.exc import IntegrityError, DataError
 from models import db, Entry, Repo
+from datetime import datetime
 
 # Set db to testing db prior to app import
 os.environ['DATABASE_URI'] = "postgresql:///link-test"
@@ -26,6 +27,12 @@ class RepoModelTestCase(TestCase):
         # Clean failed transactions
         db.session.rollback()
     
+    def test_defaults(self):
+        """Repo's is_private and last_visited fields should default to False and creation time, respectively"""
+        repo = Repo.query.get('123abc')
+        today = datetime.now().date()
+        self.assertEqual(repo.is_private, False)
+        self.assertEqual(repo.last_visited, today)
 
     def test_constraints(self):
         """Two or more repos should not have the same access key.
@@ -70,8 +77,8 @@ class RepoModelTestCase(TestCase):
     
     def test_create_method(self):
         """Create method must make unique access key, and hashed and salted pw"""
-
-        repo1 = Repo.create(pass_phrase='123abc', title='title a', description='description b')
+        today = datetime.now().date()
+        repo1 = Repo.create(pass_phrase='123abc', title='title a', description='description b', is_private=True)
         repo2 = Repo.create(pass_phrase='123abc')
 
         db.session.add_all([repo1, repo2])
@@ -81,9 +88,15 @@ class RepoModelTestCase(TestCase):
         self.assertNotEqual(repo1.pass_phrase, repo2.pass_phrase) #salted
         self.assertNotEqual(repo1.access_key, repo2.access_key) #unique keys
 
-        # passed title and description must carry to db entry
+        # passed fields must carry to db entry
         self.assertEqual(repo1.title, 'title a')
         self.assertEqual(repo1.description, 'description b')
+        self.assertEqual(repo1.is_private, True)
+        # Instantiated with defaults where applicable
+        self.assertEqual(repo2.is_private, False)
+        self.assertIsNotNone(repo2.is_private)
+        self.assertEqual(repo1.last_visited, today)
+        self.assertEqual(repo2.last_visited, today)
     
     def test_auth_method(self):
         """Authenticate method must return true if plaintext passphrase matches hashed passphrase"""

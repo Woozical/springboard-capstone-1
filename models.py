@@ -2,6 +2,7 @@ import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from utils import generate_access_key
+from datetime import datetime
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -18,12 +19,14 @@ class Repo(db.Model):
     pass_phrase = db.Column(db.Text, nullable=False)
     title = db.Column(db.String(100))
     description = db.Column(db.String(300))
+    is_private = db.Column(db.Boolean, nullable=False, default=False)
+    last_visited = db.Column(db.Date, nullable=False, default=datetime.now)
 
     @classmethod
-    def create(cls, pass_phrase, title=None, description=None):
+    def create(cls, pass_phrase, title=None, description=None, is_private=None):
         hashed_pw = bcrypt.generate_password_hash(pass_phrase).decode('utf-8')
         access_key = generate_access_key()
-        return cls(title=title, description=description, pass_phrase=hashed_pw, access_key=access_key)
+        return cls(title=title, description=description, pass_phrase=hashed_pw, access_key=access_key, is_private=is_private)
     
     @classmethod
     def authenticate(cls, access_key, pass_phrase):

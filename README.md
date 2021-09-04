@@ -21,12 +21,13 @@ sequence refers to what position the entry will appear at in the list when viewi
 
 __Repo__
 
-access_key | passphrase | title | description |
---- | --- | --- | --- 
-| Text, PK | Text | Text, Nullable | Text, Nullable |
+| access_key | pass_phrase | title | description | is_private | last_visited | 
+--- | --- | --- | --- | --- | --- 
+| Text, PK | Text | Text, Nullable | Text, Nullable | Boolean, default=False | Date, default=Creation time |
 
-The access_key is a hash of a random seed generated for each repo, it serves as the primary key in the database and as the resource identifier in url routes.
-The passphrase is a an encrypted, salted hash. Viewers of a repo must enter the passphrase before being given editing priviledges.
+The `access_key` is a hash of a random seed generated for each repo, it serves as the primary key in the database and as the resource identifier in url routes.
+The `pass_phrase` is a an encrypted, salted hash. Viewers of a repo must enter the passphrase before being given editing priviledges, or to view the repo if `is_private` is `True`.
+`last_visited` is the date and time that any user has accessed the repo (I plan to cull inactive repos)
 
 ## User Flow
 

@@ -77,11 +77,16 @@ class Repo {
         this.refreshEntryList();
     }
 
-    addLink(url){
+    async addLink(url){
         // scrape data on URL through server
+        // TO-DO: make sure outgoing url has schema
+        const scrape = await axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} });
+        const metaData = scrape.data.data;
+        console.log(metaData);
+        // TO-DO: 
         const data = {
-            id: -1, title: 'Scraped Title', description: 'Scraped description',
-            image: null, url: url, type: 'link',
+            id: -1, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
+            image: metaData.image, url: url, type: 'link',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));

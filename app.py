@@ -59,6 +59,16 @@ def repo_auth_form():
 
 
 ### API Layer ###
+
+@app.route('/api/scrape')
+def api_scrape_url():
+    # TO-DO: Add CSRF security to prevent direct access
+    # TO-DO: If resource isn't HTML (i.e. image), do special stuff
+    print(request.args['url'])
+    meta_data = get_tags(request.args['url'])
+    return jsonify(msg="success", data=meta_data)
+
+
 @app.route('/api/repo/<access_key>', methods=['GET'])
 def api_repo_get(access_key):
     repo = Repo.query.get(access_key)

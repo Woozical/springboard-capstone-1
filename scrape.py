@@ -1,6 +1,8 @@
 import requests
+from urllib.parse import unquote
 
 def get_tags(url:str):
+    url = unquote(url)
     res = requests.get(url)
     return parse_HTML(res.text)
 

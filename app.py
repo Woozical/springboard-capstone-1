@@ -69,23 +69,22 @@ def api_repo_get(access_key):
     else:
         return jsonify(error="Unauthorized"), 401
 
-@app.route('/api/repo/<access_key>/auth', methods=['POST'])
-def api_repo_auth(access_key):
-    repo = Repo.query.get(access_key)
+@app.route('/api/repo/auth', methods=['POST'])
+def api_repo_auth():
     data = request.get_json()
-    if not repo:
-        return jsonify(error="Repo not found"), 404
 
     if not request.is_json:
         return jsonify(error="Bad request, payload must be JSON"), 400
 
     # Authorize
-    if "pass_phrase" not in data:
+    if "access_key" not in data:
+        return jsonify(error="Field 'access_key' required for operation."), 400
+    elif "pass_phrase" not in data:
         return jsonify(error="Field 'pass_phrase' required for operation."), 400
-    elif not Repo.authenticate(access_key, data['pass_phrase']):
+    elif not Repo.authenticate(data['access_key'], data['pass_phrase']):
         return jsonify(error="Unauthorized"), 401
     else:
-        session['working_repo'] = access_key
+        session['working_repo'] = data['access_key']
         return jsonify(message='success')
 
 @app.route('/api/repo/<access_key>', methods=['DELETE'])

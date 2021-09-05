@@ -5,6 +5,17 @@ Untitled Repo
 {% endblock %}
 
 {% block content %}
+<div id="controls">
+    {% if session['working_repo'] == repo.access_key %}
+    <form id="new-link-form" action="">
+        <input type="text" id="inputURL" name="new">
+    </form>
+    <button id="btn-new-divide">Add Divider</button>
+    <button id="btn-new-tbox">Add TextBox</button>
+    {% else %}
+    <p>Enter passphrase for editing...</p>
+    {% endif %}
+</div>
 <div id="content">
     <h1 id="repo-title"></h1>
     <p id="repo-desc"></p>

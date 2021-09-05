@@ -1,5 +1,5 @@
 class Entry {
-    constructor({id, title, description, image, url, entry_type, rating, sequence}){
+    constructor({id, title, description, image, url, entry_type, rating, sequence}, state){
         this.id = id;
         this.title = title;
         this.description = description;
@@ -8,6 +8,7 @@ class Entry {
         this.type = entry_type;
         this.rating = rating;
         this.sequence = sequence;
+        this.state = state;
     }
     
 }
@@ -20,7 +21,7 @@ class Repo {
         this.entries = [];
         for (let entry of entries){
             this.entries.push(
-                new Entry(entry)
+                new Entry(entry, "ORIGINAL")
             );
         }
 
@@ -32,14 +33,19 @@ class Repo {
         this.entries.sort( (a, b) => a[sortType] - b[sortType] );
     }
 
-    displayInfo(){
+    displayRepoInfo(){
         if (this.title){
             document.title = this.title;
         }
 
         document.getElementById('repo-title').innerText = this.title ? this.title : 'Untitled Repo';
         document.getElementById('repo-desc').innerText = this.description;
+
+    }
+
+    refreshEntryList(){
         const entriesList = document.getElementById('repo-entry-list');
+        entriesList.innerHTML = '';
         for (let entry of this.entries){
             const li = document.createElement('li');
             // check type in future
@@ -49,6 +55,37 @@ class Repo {
             `
             entriesList.append(li);
         }
+    }
+
+    addDivider(){
+        const data = {
+            id : -1, title: 'New Divider', description: null,
+            image: null, url: null, type: 'divider',
+            rating: null, sequence: this.entries.length
+        };
+        this.entries.push(new Entry(data, 'NEW'));
+        this.refreshEntryList();
+    }
+
+    addTextBox(){
+        const data = {
+            id : -1, title: 'New Text Box', description: '...',
+            image: null, url: null, type: 'text_box',
+            rating: null, sequence: this.entries.length
+        };
+        this.entries.push(new Entry(data, 'NEW'));
+        this.refreshEntryList();
+    }
+
+    addLink(url){
+        // scrape data on URL through server
+        const data = {
+            id: -1, title: 'Scraped Title', description: 'Scraped description',
+            image: null, url: url, type: 'link',
+            rating: null, sequence: this.entries.length
+        };
+        this.entries.push(new Entry(data, 'NEW'));
+        this.refreshEntryList();
     }
 }
 
@@ -61,10 +98,23 @@ async function loadRepoData(accessKey){
             displayAuthForm(accessKey);
         }
     }
+    
     if (res){
+        // Load in data from server
         const repo = new Repo(res.data);
-        console.log(repo);
-        repo.displayInfo();
+        repo.displayRepoInfo();
+        repo.refreshEntryList();
+        // Set up event listeners
+        document.getElementById('btn-new-divide').addEventListener('click', () => {repo.addDivider()});
+        document.getElementById('btn-new-tbox').addEventListener('click', () => {repo.addTextBox()});
+        
+        const form = document.getElementById('new-link-form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const link = form.new.value;
+            repo.addLink(link);
+            form.new.value = '';
+        });
     }
 }
 
@@ -110,3 +160,4 @@ function populateEntryList(entries){
         list.append(entryDiv);
     }
 }
+

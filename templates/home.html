@@ -7,9 +7,13 @@ LinkBin
 {% block content %}
 <h1>Welcome</h1>
 <p>This is the landing page</p>
+<button id="create-btn">New Repository</button>
+<div id="create-div" hidden>
+    {% include 'forms/create-repo.html' %}
+</div>
 
-<form action="/test" method="GET">
-<input type="text" name="pw">
-<button>submit</button>
-</form>
+{% endblock %}
+
+{% block script %}
+<script src="/static/landing.js"></script>
 {% endblock %}

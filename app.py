@@ -1,7 +1,7 @@
 import os
 from flask import Flask, session, render_template, request, redirect, url_for, jsonify
 from models import db, connect_db, Repo, Entry
-from forms import NewRepoForm
+from forms import AuthRepoForm, NewRepoForm
 from scrape import get_tags
 
 app = Flask(__name__)
@@ -23,7 +23,8 @@ db.create_all()
 
 @app.route('/')
 def home_view():
-    return render_template('home.html')
+    form = NewRepoForm()
+    return render_template('home.html', form=form)
 
 @app.route('/repo/<access_key>')
 def repo_view(access_key):
@@ -34,6 +35,7 @@ def repo_view(access_key):
 def repo_create():
     # TO DO: This should only return the HTML on json requests
     # (To prevent users from navigating directly to /repo/create)
+    # If the repo creation form lives on landing page, this route can be POST only
     form = NewRepoForm()
     if form.validate_on_submit():
         new_repo = Repo.create(
@@ -50,6 +52,13 @@ def repo_create():
     else:
         return render_template('/forms/create-repo.html', form=form)
 
+@app.route('/forms/auth-repo', methods=['GET'])
+def repo_auth_form():
+    form = AuthRepoForm()
+    key = request.args['access_key']
+
+    return render_template('/forms/auth-repo.html', form=form, key=key)
+
 
 ### API Layer ###
 @app.route('/api/repo/<access_key>', methods=['GET'])
@@ -62,7 +71,7 @@ def api_repo_get(access_key):
     else:
         return jsonify(error="Unauthorized"), 401
 
-@app.route('/api/<access_key>/auth', methods=['POST'])
+@app.route('/api/repo/<access_key>/auth', methods=['POST'])
 def api_repo_auth(access_key):
     repo = Repo.query.get(access_key)
     data = request.get_json()

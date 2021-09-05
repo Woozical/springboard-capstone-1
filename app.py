@@ -55,9 +55,7 @@ def repo_create():
 @app.route('/forms/auth-repo', methods=['GET'])
 def repo_auth_form():
     form = AuthRepoForm()
-    key = request.args['access_key']
-
-    return render_template('/forms/auth-repo.html', form=form, key=key)
+    return render_template('/forms/auth-repo.html', form=form)
 
 
 ### API Layer ###
@@ -83,7 +81,7 @@ def api_repo_auth(access_key):
 
     # Authorize
     if "pass_phrase" not in data:
-        return jsonify(error="Field 'pass_phrase' required for DELETE operation."), 400
+        return jsonify(error="Field 'pass_phrase' required for operation."), 400
     elif not Repo.authenticate(access_key, data['pass_phrase']):
         return jsonify(error="Unauthorized"), 401
     else:

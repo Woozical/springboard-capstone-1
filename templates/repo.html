@@ -9,19 +9,13 @@ untitled repo
 {% endblock %}
 
 {% block content %}
-    <h1>Repo View
-        {% if repo.title %}
-        - {{repo.title}}
-        {% endif %}
-    </h1>
-    {% if repo.description %}
-        <p>{{repo.description}}</p>
-    {% else %}
-        <p>Here's where the links live</p>
-    {% endif %}
-
-    <div id="link-list"></div>
-
+<div id="content">
+    <h1 id="repo-title"></h1>
+    <p id="repo-desc"></p>
+    <div id="repo-entries">
+        <ul id='repo-entry-list'></ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
@@ -29,7 +23,6 @@ untitled repo
 <script>
     // main js already loaded
     // make api call to load data of {{access_key}}
-    // SECURITY ISSUE: User can call with access key, need to request -> server prompts auth -> client sends credentials -> gets data
     loadRepoData('{{repo.access_key}}')
 </script>
 {% endblock %}

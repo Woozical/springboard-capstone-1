@@ -23,6 +23,26 @@ Untitled Repo
         <ul id='repo-entry-list'></ul>
     </div>
 </div>
+<div id="entry-edit" hidden>
+    <form id="entry-edit-form">
+        <label for="entryTitle">Title</label>
+        <input type="text" id="entryTitle" name="entryTitle">
+        <label for="entryDesc">Description</label>
+        <input type="text" id="entryDesc" name="entryDesc">
+        <label for="entryImage">Image Preview</label>
+        <input type="text" id="entryImage" name="entryImage">
+        <label for="entryURL">URL</label>
+        <input type="text" id="entryURL" name="entryURL">
+        <label for="entryType">Type</label>
+        <input type="text" id="entryType" name="entryType" list="entry-types">
+        <datalist id="entry-types">
+            <option value="link">
+            <option value="divider">
+            <option value="text_box">
+        </datalist>
+        <button>Done</button>
+    </form>
+</div>
 {% endblock %}
 
 {% block script %}

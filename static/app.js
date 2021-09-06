@@ -1,14 +1,25 @@
+const NOIMG = '/static/images/globe.png';
+
 class Entry {
+    static idGen = Entry.generateID();
     constructor({id, title, description, image, url, entry_type, rating, sequence}, state){
-        this.id = id;
+        this.id = id ? id : Entry.idGen.next().value;
         this.title = title;
         this.description = description;
-        this.image= image ? image : '/static/images/globe.png';
+        this.image= image ? image : NOIMG;
         this.url = url;
         this.type = entry_type;
         this.rating = rating;
         this.sequence = sequence;
         this.state = state;
+    }
+
+    static* generateID(){
+        let id = -1;
+        while (true){
+            yield id;
+            id--;
+        }
     }
     
 }
@@ -42,24 +53,39 @@ class Repo {
         document.getElementById('repo-desc').innerText = this.description;
 
     }
-
+    // TO DO: Move the HTML markup into a method on Entry
     refreshEntryList(){
         const entriesList = document.getElementById('repo-entry-list');
         entriesList.innerHTML = '';
-        for (let entry of this.entries){
-            const li = document.createElement('li');
-            // check type in future
-            li.innerHTML = `
-            <img src="${entry.image}" width=100 height=100>
-            <a href="${entry.url}">${entry.title}</a>
-            `
-            entriesList.append(li);
-        }
+
+        this.entries.forEach(
+            (entry, index) => {
+                const li = document.createElement('li');
+                li.id = `entry_${index}`;
+                // TO DO: check type in future
+                li.innerHTML = `
+                <button id="edit_${index}">Edit</button>
+                <img src="${entry.image}" width=100 height=100>
+                <a href="${entry.url}">${entry.title}</a>
+                `
+                entriesList.append(li);
+            }
+        );
+    }
+
+    refreshEntryMarkup(entryIndex){
+        const entryLI = document.getElementById(`entry_${entryIndex}`);
+        const entry = this.entries[entryIndex];
+        entryLI.innerHTML = `
+        <button id="edit_${entryIndex}">Edit</button>
+        <img src="${entry.image}" width=100 height=100>
+        <a href="${entry.url}">${entry.title}</a>
+        `
     }
 
     addDivider(){
         const data = {
-            id : -1, title: 'New Divider', description: null,
+            id : null, title: 'New Divider', description: null,
             image: null, url: null, type: 'divider',
             rating: null, sequence: this.entries.length
         };
@@ -69,7 +95,7 @@ class Repo {
 
     addTextBox(){
         const data = {
-            id : -1, title: 'New Text Box', description: '...',
+            id : null, title: 'New Text Box', description: '...',
             image: null, url: null, type: 'text_box',
             rating: null, sequence: this.entries.length
         };
@@ -85,12 +111,13 @@ class Repo {
         console.log(metaData);
         // TO-DO: 
         const data = {
-            id: -1, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
-            image: metaData.image, url: url, type: 'link',
+            id: null, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
+            image: metaData.image, url: url, entry_type: 'link',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
         this.refreshEntryList();
+        console.log(this);
     }
 }
 
@@ -109,18 +136,64 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
+        
         // Set up event listeners
         document.getElementById('btn-new-divide').addEventListener('click', () => {repo.addDivider()});
         document.getElementById('btn-new-tbox').addEventListener('click', () => {repo.addTextBox()});
         
-        const form = document.getElementById('new-link-form');
-        form.addEventListener('submit', (e) => {
+        const newLinkForm = document.getElementById('new-link-form');
+        newLinkForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const link = form.new.value;
+            const link = newLinkForm.new.value;
             repo.addLink(link);
-            form.new.value = '';
+            newLinkForm.new.value = '';
         });
+
+        const entriesList = document.getElementById('repo-entry-list');
+        entriesList.addEventListener('click', function(e){
+            if (e.target.tagName === 'BUTTON'){
+                // show edit form
+                document.getElementById('entry-edit').hidden = false;
+                const entryIndex = e.target.id.split('_')[1];
+                loadEntryIntoEditForm(repo, entryIndex);
+            }
+        });
+
+        const entryEditForm = document.getElementById('entry-edit-form');
+        entryEditForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            const entryIndex = +entryEditForm.getAttribute('data-entryIndex');
+            const entry = repo.entries[entryIndex];
+            entry.title = entryEditForm.entryTitle.value;
+            entry.description = entryEditForm.entryDesc.value;
+            entry.url = entryEditForm.entryURL.value;
+            entry.type = entryEditForm.entryType.value;
+            entry.image = entryEditForm.entryImage.value ? entryEditForm.entryImage.value : NOIMG;
+
+            entryEditForm.entryTitle.value = '';
+            entryEditForm.entryDesc.value = '';
+            entryEditForm.entryURL.value = '';
+            entryEditForm.entryType.value = '';
+            entryEditForm.entryImage.value = '';
+
+            repo.refreshEntryMarkup(entryIndex);
+            document.getElementById('entry-edit').hidden = true;
+        });
+
     }
+}
+
+function loadEntryIntoEditForm(repo, entryIndex){
+    const entry = repo.entries[entryIndex];
+    const form = document.getElementById('entry-edit-form');
+
+    form.entryTitle.value = entry.title;
+    form.entryDesc.value = entry.description;
+    form.entryURL.value = entry.url;
+    form.entryType.value = entry.type;
+    form.entryImage.value = entry.image === NOIMG ? '' : entry.image;
+    form.setAttribute('data-entryIndex', entryIndex);
+
 }
 
 async function displayAuthForm(accessKey){
@@ -152,17 +225,3 @@ async function displayAuthForm(accessKey){
     })
 
 }
-
-function populateEntryList(entries){
-    for (let entry of entries){
-        const list = document.getElementById('link-list');
-        const entryDiv = document.createElement('div');
-
-        const link = document.createElement('a');
-        link.innerText = entry.title;
-        link.href = entry.url;
-        entryDiv.append(link);
-        list.append(entryDiv);
-    }
-}
-

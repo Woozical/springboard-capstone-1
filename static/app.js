@@ -21,6 +21,10 @@ class Entry {
             id--;
         }
     }
+
+   static toJSON({id, title, description, image, url, type, rating, sequence}){
+        return {id, title, description, image, url, type, rating, sequence};
+    }
     
 }
 
@@ -37,7 +41,7 @@ class Repo {
         }
 
         this.sortEntries();
-       
+        console.log(this);
     }
 
     sortEntries(sortType='sequence'){
@@ -119,6 +123,30 @@ class Repo {
         this.refreshEntryList();
         console.log(this);
     }
+
+    commitEntryChanges(){
+        // parse repo changes and send to server
+        const toAdd = [];
+        const toChange = [];
+        const toDelete = [];
+        for (let entry of this.entries){
+            switch (entry.state){
+                case 'NEW':
+                    toAdd.push(Entry.toJSON(entry));
+                    break;
+                case 'CHANGE':
+                    toChange.push(Entry.toJSON(entry));
+                    break;
+                case 'DELETE':
+                    toDelete.push(entry.id);
+                    break;
+            }
+        }
+        const endPoint = `/api/repo/${this.accessKey}/entries`;
+        if (toAdd.length > 0) axios.post(`${endPoint}/new`, {'new' : toAdd});
+        if (toChange.length > 0) axios.patch(endPoint, {'change' : toChange});
+        if (toDelete.length > 0) axios.delete(endPoint, {'delete' : toDelete});
+    }
 }
 
 async function loadRepoData(accessKey){
@@ -136,11 +164,11 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
-        
+        repo.commitEntryChanges();
         // Set up event listeners
         document.getElementById('btn-new-divide').addEventListener('click', () => {repo.addDivider()});
         document.getElementById('btn-new-tbox').addEventListener('click', () => {repo.addTextBox()});
-        
+        document.getElementById('btn-save-changes').addEventListener('click', () => {repo.commitEntryChanges()});
         const newLinkForm = document.getElementById('new-link-form');
         newLinkForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -169,6 +197,7 @@ async function loadRepoData(accessKey){
             entry.url = entryEditForm.entryURL.value;
             entry.type = entryEditForm.entryType.value;
             entry.image = entryEditForm.entryImage.value ? entryEditForm.entryImage.value : NOIMG;
+            entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE'
 
             entryEditForm.entryTitle.value = '';
             entryEditForm.entryDesc.value = '';

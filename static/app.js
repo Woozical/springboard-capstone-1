@@ -1,12 +1,14 @@
 const NOIMG = '/static/images/globe.png';
 
+// TO DO: Repo information editing
+
 class Entry {
     static idGen = Entry.generateID();
     constructor({id, title, description, image, url, entry_type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
         this.title = title;
         this.description = description;
-        this.image= image ? image : NOIMG;
+        this.image= image;
         this.url = url;
         this.type = entry_type;
         this.rating = rating;
@@ -24,6 +26,43 @@ class Entry {
 
    static toJSON({id, title, description, image, url, type, rating, sequence}){
         return {id, title, description, image, url, type, rating, sequence};
+    }
+
+    generateMarkup(index){
+        // TO DO: markup styling
+        const img = this.image ? this.image : NOIMG;
+        let markup = ''
+        switch (this.type){
+            case 'link':
+                markup = `
+                <div>
+                    <button id="delete_${index}">X</button>
+                    <button id="edit_${index}">Edit</button>
+                    <img src="${img}" width=50 height=50>
+                    <a href="${this.url}">${this.title}</a>
+                </div>
+                `;
+                break;
+            case 'divider':
+                markup = `
+                <button id="delete_${index}">X</button>
+                <button id="edit_${index}">Edit</button>
+                <hr>
+                `
+                break;
+            case 'text_box':
+                markup = `
+                <div>
+                    <button id="delete_${index}">X</button>
+                    <button id="edit_${index}">Edit</button>
+                    <p><b>${this.title}</b> <br>
+                    ${this.description}
+                    </p>
+                </div>
+                `
+                break;  
+        }
+        return markup;
     }
     
 }
@@ -57,22 +96,18 @@ class Repo {
         document.getElementById('repo-desc').innerText = this.description;
 
     }
-    // TO DO: Move the HTML markup into a method on Entry
     refreshEntryList(){
         const entriesList = document.getElementById('repo-entry-list');
         entriesList.innerHTML = '';
 
         this.entries.forEach(
             (entry, index) => {
-                const li = document.createElement('li');
-                li.id = `entry_${index}`;
-                // TO DO: check type in future
-                li.innerHTML = `
-                <button id="edit_${index}">Edit</button>
-                <img src="${entry.image}" width=100 height=100>
-                <a href="${entry.url}">${entry.title}</a>
-                `
-                entriesList.append(li);
+                if (entry.state != 'DELETE'){ // Don't render entries marked for deletion
+                    const li = document.createElement('li');
+                    li.id = `entry_${index}`;
+                    li.innerHTML = entry.generateMarkup(index);
+                    entriesList.append(li);
+                }
             }
         );
     }
@@ -80,17 +115,13 @@ class Repo {
     refreshEntryMarkup(entryIndex){
         const entryLI = document.getElementById(`entry_${entryIndex}`);
         const entry = this.entries[entryIndex];
-        entryLI.innerHTML = `
-        <button id="edit_${entryIndex}">Edit</button>
-        <img src="${entry.image}" width=100 height=100>
-        <a href="${entry.url}">${entry.title}</a>
-        `
+        entryLI.innerHTML = entry.generateMarkup(entryIndex);
     }
 
     addDivider(){
         const data = {
             id : null, title: 'New Divider', description: null,
-            image: null, url: null, type: 'divider',
+            image: null, url: null, entry_type: 'divider',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
@@ -100,7 +131,7 @@ class Repo {
     addTextBox(){
         const data = {
             id : null, title: 'New Text Box', description: '...',
-            image: null, url: null, type: 'text_box',
+            image: null, url: null, entry_type: 'text_box',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
@@ -110,6 +141,8 @@ class Repo {
     async addLink(url){
         // scrape data on URL through server
         // TO-DO: make sure outgoing url has schema
+        // set-up so that we don't wait on metadata to show the entry
+        // once we have metadata, refresh entry to show it
         const scrape = await axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} });
         const metaData = scrape.data.data;
         console.log(metaData);
@@ -124,7 +157,18 @@ class Repo {
         console.log(this);
     }
 
+    deleteEntry(entryIndex){
+        const entry = this.entries[entryIndex];
+        if (entry.state == 'NEW'){
+            this.entries.splice(entryIndex, 1);
+        } else {
+            entry.state = 'DELETE';
+        }
+        this.refreshEntryList();
+    }
+
     commitEntryChanges(){
+        console.log(this);
         // parse repo changes and send to server
         const toAdd = [];
         const toChange = [];
@@ -145,11 +189,12 @@ class Repo {
         const endPoint = `/api/repo/${this.accessKey}/entries`;
         if (toAdd.length > 0) axios.post(`${endPoint}/new`, {'new' : toAdd});
         if (toChange.length > 0) axios.patch(endPoint, {'change' : toChange});
-        if (toDelete.length > 0) axios.delete(endPoint, {'delete' : toDelete});
+        if (toDelete.length > 0) axios.delete(endPoint, {data : {'delete' : toDelete }});
     }
 }
 
 async function loadRepoData(accessKey){
+    // To Do: Break up this function, write event handlers separate where needed
     let res
     try {
         res = await axios.get(`/api/repo/${accessKey}`);
@@ -179,11 +224,15 @@ async function loadRepoData(accessKey){
 
         const entriesList = document.getElementById('repo-entry-list');
         entriesList.addEventListener('click', function(e){
-            if (e.target.tagName === 'BUTTON'){
-                // show edit form
-                document.getElementById('entry-edit').hidden = false;
-                const entryIndex = e.target.id.split('_')[1];
-                loadEntryIntoEditForm(repo, entryIndex);
+            const [method, entryIndex] = e.target.id.split('_');
+            switch (method){
+                case 'edit':
+                    document.getElementById('entry-edit').hidden = false;
+                    loadEntryIntoEditForm(repo, entryIndex);
+                    break;
+                case 'delete':
+                    repo.deleteEntry(entryIndex);
+                    break;
             }
         });
 
@@ -226,6 +275,7 @@ function loadEntryIntoEditForm(repo, entryIndex){
 }
 
 async function displayAuthForm(accessKey){
+    // To Do: Move handling of this to server (see notes on disc)
     const content = document.getElementById('content');
     content.innerHTML = `
     <form id="auth-form">

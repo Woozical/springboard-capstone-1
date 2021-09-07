@@ -35,12 +35,11 @@ Untitled Repo
         <label for="entryURL">URL</label>
         <input type="text" id="entryURL" name="entryURL">
         <label for="entryType">Type</label>
-        <input type="text" id="entryType" name="entryType" list="entry-types">
-        <datalist id="entry-types">
-            <option value="link">
-            <option value="divider">
-            <option value="text_box">
-        </datalist>
+        <select id="entryType" name="entryType">
+            <option value="link">Link</option>
+            <option value="divider">Divider</option>
+            <option value="text_box">Text Box</option>
+        </select>
         <button>Done</button>
     </form>
 </div>

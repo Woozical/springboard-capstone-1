@@ -203,11 +203,11 @@ def api_repo_new_entries(access_key):
                 )
             )
     except KeyError as err:
-        return jsonify(error=err.message), 400
+        return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
     db.session.add_all(new_entries)
-    db.session.commit()
     repo.update_last_visited()
+    db.session.commit()
     return jsonify(msg=f"Success. Created {len(new_entries)} on {access_key}"), 201
 
 
@@ -245,8 +245,8 @@ def api_entries_patch(access_key):
     except KeyError as err:
         return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
-    db.session.commit()
     repo.update_last_visited()
+    db.session.commit()
     return jsonify(msg=f"Success. Updated {len(data['change'])} on {access_key}")
 
 @app.route('/api/repo/<access_key>/entries', methods=['DELETE'])
@@ -276,8 +276,8 @@ def api_entries_deletion(access_key):
     except KeyError as err:
         return jsonify(error=err.message), 400
     
-    db.session.commit()
     repo.update_last_visited()
+    db.session.commit()
     return jsonify(msg=f"Success. Deleted {len(data['delete'])} on {access_key}")
 
 # @app.route('/api/entry/<int:id>', methods=['DELETE'])

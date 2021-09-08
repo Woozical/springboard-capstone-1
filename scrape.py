@@ -35,9 +35,17 @@ def parse_HTML(content):
     if 'title' not in tags:
         tags['title'] = content.partition('<title>')[2].partition('</title>')[0]
     if 'description' not in tags:
-        tags['description'] = content.partition(
-            '<meta name="description" content="'
-        )[2].partition(
-            '">'
-        )[0]
+        desc = content.partition('<meta name="description" content="')[2]
+        y1 = desc.find('/>')
+        y2 = desc.find('>')
+        if y1 == -1:
+            y = y2
+        elif y2 == -1:
+            y = y1
+        elif y1 < y2:
+            y = y1
+        else:
+            y = y2
+
+        tags['description'] = desc[:y].strip(' "')
     return tags

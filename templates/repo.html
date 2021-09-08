@@ -11,26 +11,26 @@ Untitled Repo
 <div id="controls">
     {% if session['working_repo'] == repo.access_key %}
     <form id="new-link-form" action="">
-        <input type="text" id="inputURL" name="new">
+        <input type="text" id="input-url" name="new">
     </form>
     <button id="btn-new-divide">Add Divider</button>
     <button id="btn-new-tbox">Add TextBox</button>
     <button id="btn-save-changes">Save Changes</button>
     <button id="btn-edit-repo">Edit Repo Info</button>
     {% else %}
-    <p>Enter passphrase for editing...</p>
+    <button id="btn-auth-repo">Edit</button>
     {% endif %}
 </div>
 <div id="repo-edit-div" hidden>
     <form id="repo-edit-form">
-        <label for="repoTitleInput">Title</label>
-        <input type="text" id="repoTitleInput" name="repoTitle">
-        <label for="repoDescInput">Description</label>
-        <input type="text" id="repoDescInput" name="repoDesc">
-        <label for="repoPrivacyInput">Private Repo</label>
+        <label for="repo-title-input">Title</label>
+        <input type="text" id="repo-title-input" name="repoTitle">
+        <label for="repo-desc-input">Description</label>
+        <input type="text" id="repo-desc-input" name="repoDesc">
+        <label for="repo-privacy-input">Private Repo</label>
         
         <input type="checkbox"
-        id="repoPrivacyInput"
+        id="repo-privacy-input"
         name="repoPrivacy"
         {% if repo.is_private %}
         checked
@@ -47,18 +47,18 @@ Untitled Repo
     </div>
 </div>
 <!-- To Do: Re-name this to entry-edit-div -->
-<div id="entry-edit" hidden>
+<div id="entry-edit-div" hidden>
     <form id="entry-edit-form">
-        <label for="entryTitle">Title</label>
-        <input type="text" id="entryTitle" name="entryTitle">
-        <label for="entryDesc">Description</label>
-        <input type="text" id="entryDesc" name="entryDesc">
-        <label for="entryImage">Image Preview</label>
-        <input type="text" id="entryImage" name="entryImage">
-        <label for="entryURL">URL</label>
-        <input type="text" id="entryURL" name="entryURL">
-        <label for="entryType">Type</label>
-        <select id="entryType" name="entryType">
+        <label for="entry-title-input">Title</label>
+        <input type="text" id="entry-title-input" name="entryTitle">
+        <label for="entry-desc-input">Description</label>
+        <input type="text" id="entry-desc-input" name="entryDesc">
+        <label for="entry-image-input">Image Preview</label>
+        <input type="text" id="entry-image-input" name="entryImage">
+        <label for="entry-url">URL</label>
+        <input type="text" id="entry-url-input" name="entryURL">
+        <label for="entry-type-input">Type</label>
+        <select id="entry-type-input" name="entryType">
             <option value="link">Link</option>
             <option value="divider">Divider</option>
             <option value="text_box">Text Box</option>
@@ -70,9 +70,15 @@ Untitled Repo
 
 {% block script %}
 <script src="/static/app.js"></script>
-<script>
-    // main js already loaded
-    // make api call to load data of {{access_key}}
-    loadRepoData('{{repo.access_key}}')
-</script>
+{% if session.get('working_repo') == repo.access_key %}
+    <script>
+        let viewState = 1;
+        loadRepoData('{{repo.access_key}}');
+    </script>
+{% else %}
+    <script>
+        let viewState = 0;
+        loadRepoData('{{repo.access_key}}');
+    </script>
+{% endif %}
 {% endblock %}

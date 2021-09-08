@@ -1,5 +1,5 @@
 import os
-from flask import Flask, session, render_template, request, redirect, url_for, jsonify
+from flask import Flask, session, render_template, request, redirect, url_for, jsonify, flash
 from models import db, connect_db, Repo, Entry
 from forms import AuthRepoForm, NewRepoForm
 from scrape import get_tags
@@ -29,8 +29,31 @@ def home_view():
 
 @app.route('/repo/<access_key>')
 def repo_view(access_key):
+    # To Do: Put auth for private repo here
     repo = Repo.query.get_or_404(access_key)
-    return render_template('repo.html', repo=repo)
+    if repo.is_private and ('working_repo' not in session or session['working_repo'] != access_key):
+        return redirect(url_for('repo_auth', access_key=access_key))
+    else:
+        return render_template('repo.html', repo=repo)
+
+@app.route('/repo/auth', methods=['GET', 'POST'])
+def repo_auth():
+    """Brings up auth page for a repo (for private viewing / editing priviledges)"""
+    form = AuthRepoForm()
+    repo = Repo.query.get_or_404(request.args.get('access_key'))
+
+    if session.get('working_repo') == repo.access_key:
+        return redirect(url_for('repo_view', access_key=repo.access_key))
+
+    if form.validate_on_submit():
+        if Repo.authenticate(repo.access_key, form.pass_phrase.data):
+            session['working_repo'] = repo.access_key
+            return redirect(url_for('repo_view', access_key=repo.access_key))
+        else:
+            flash('Wrong password')
+        
+    return render_template('/forms/auth-repo.html', form=form)
+
 
 @app.route('/repo/create', methods=['GET', 'POST'])
 def repo_create():
@@ -134,10 +157,10 @@ def api_repo_patch(access_key):
         return jsonify(error="Bad request, payload must be JSON"), 400
 
     # Authorize
-    if "pass_phrase" not in data:
-        return jsonify(error="Field 'pass_phrase' required for PATCH operation."), 400
-    elif not Repo.authenticate(access_key, data['pass_phrase']):
+    if "working_repo" not in session:
         return jsonify(error="Unauthorized"), 401
+    if session['working_repo'] != access_key:
+        return jsonify(error="Unauthorized"), 403
     
     # Update
     if 'is_private' in data:

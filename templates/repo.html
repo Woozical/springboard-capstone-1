@@ -5,6 +5,9 @@ Untitled Repo
 {% endblock %}
 
 {% block content %}
+<!-- To Do: Auth sectioning -->
+<!-- To Do: WTForms for forms? -->
+<!-- To Do: IDs to kabob case -->
 <div id="controls">
     {% if session['working_repo'] == repo.access_key %}
     <form id="new-link-form" action="">
@@ -13,9 +16,28 @@ Untitled Repo
     <button id="btn-new-divide">Add Divider</button>
     <button id="btn-new-tbox">Add TextBox</button>
     <button id="btn-save-changes">Save Changes</button>
+    <button id="btn-edit-repo">Edit Repo Info</button>
     {% else %}
     <p>Enter passphrase for editing...</p>
     {% endif %}
+</div>
+<div id="repo-edit-div" hidden>
+    <form id="repo-edit-form">
+        <label for="repoTitleInput">Title</label>
+        <input type="text" id="repoTitleInput" name="repoTitle">
+        <label for="repoDescInput">Description</label>
+        <input type="text" id="repoDescInput" name="repoDesc">
+        <label for="repoPrivacyInput">Private Repo</label>
+        
+        <input type="checkbox"
+        id="repoPrivacyInput"
+        name="repoPrivacy"
+        {% if repo.is_private %}
+        checked
+        {% endif %}
+        >
+        <button>Save</button>
+    </form>
 </div>
 <div id="content">
     <h1 id="repo-title"></h1>
@@ -24,6 +46,7 @@ Untitled Repo
         <ul id='repo-entry-list'></ul>
     </div>
 </div>
+<!-- To Do: Re-name this to entry-edit-div -->
 <div id="entry-edit" hidden>
     <form id="entry-edit-form">
         <label for="entryTitle">Title</label>

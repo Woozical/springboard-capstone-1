@@ -1,6 +1,7 @@
 const NOIMG = '/static/images/globe.png';
 
-// TO DO: Repo information editing
+// TO DO: "Edit Mode" State
+// TO DO: Error handling, API response flashing
 
 class Entry {
     static idGen = Entry.generateID();
@@ -68,10 +69,11 @@ class Entry {
 }
 
 class Repo {
-    constructor({title, description, entries, access_key}){
+    constructor({title, description, entries, access_key, is_private}){
         this.title = title ;
         this.description = description;
         this.accessKey = access_key;
+        this.isPrivate = is_private;
         this.entries = [];
         for (let entry of entries){
             this.entries.push(
@@ -140,13 +142,12 @@ class Repo {
 
     async addLink(url){
         // scrape data on URL through server
-        // TO-DO: make sure outgoing url has schema
+        // TO-DO: make sure outgoing url has schema, no metadata request if not
         // set-up so that we don't wait on metadata to show the entry
         // once we have metadata, refresh entry to show it
         const scrape = await axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} });
         const metaData = scrape.data.data;
         console.log(metaData);
-        // TO-DO: 
         const data = {
             id: null, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
             image: metaData.image, url: url, entry_type: 'link',
@@ -165,6 +166,23 @@ class Repo {
             entry.state = 'DELETE';
         }
         this.refreshEntryList();
+    }
+
+    commitRepoChanges(event){
+        event.preventDefault();
+        const form = document.getElementById('repo-edit-form');
+        this.title = form.repoTitle.value;
+        this.description = form.repoDesc.value;
+        this.isPrivate = form.repoPrivacy.checked;
+        const data = {
+            title : this.title,
+            description: this.description,
+            is_private : this.isPrivate
+        }
+
+        axios.patch(`/api/repo/${this.accessKey}`, data);
+        this.displayRepoInfo();
+        document.getElementById('repo-edit-div').hidden = true;
     }
 
     commitEntryChanges(){
@@ -214,6 +232,8 @@ async function loadRepoData(accessKey){
         document.getElementById('btn-new-divide').addEventListener('click', () => {repo.addDivider()});
         document.getElementById('btn-new-tbox').addEventListener('click', () => {repo.addTextBox()});
         document.getElementById('btn-save-changes').addEventListener('click', () => {repo.commitEntryChanges()});
+        document.getElementById('repo-edit-form').addEventListener('submit', (e) => {repo.commitRepoChanges(e)});
+        
         const newLinkForm = document.getElementById('new-link-form');
         newLinkForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -222,11 +242,19 @@ async function loadRepoData(accessKey){
             newLinkForm.new.value = '';
         });
 
+        document.getElementById('btn-edit-repo').addEventListener('click', () => {
+            // Toggle visibility of Repo Editing Form
+            const div = document.getElementById('repo-edit-div')
+            div.hidden = !div.hidden;
+            if (div.hidden == false ) loadRepoIntoEditForm(repo);
+        })
+
         const entriesList = document.getElementById('repo-entry-list');
         entriesList.addEventListener('click', function(e){
             const [method, entryIndex] = e.target.id.split('_');
             switch (method){
                 case 'edit':
+                    // Toggle visibility of Entry Editing Form
                     document.getElementById('entry-edit').hidden = false;
                     loadEntryIntoEditForm(repo, entryIndex);
                     break;
@@ -259,6 +287,13 @@ async function loadRepoData(accessKey){
         });
 
     }
+}
+
+function loadRepoIntoEditForm(repo){
+    const form = document.getElementById('repo-edit-form');
+    form.repoTitle.value = repo.title;
+    form.repoDesc.value = repo.description;
+    form.repoPrivacy.checked = repo.isPrivate;
 }
 
 function loadEntryIntoEditForm(repo, entryIndex){

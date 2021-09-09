@@ -5,9 +5,9 @@ Untitled Repo
 {% endblock %}
 
 {% block content %}
-<!-- To Do: Auth sectioning -->
 <!-- To Do: WTForms for forms? -->
-<!-- To Do: IDs to kabob case -->
+<div id="flashes">
+</div>
 <div id="controls">
     {% if session['working_repo'] == repo.access_key %}
     <form id="new-link-form" action="">
@@ -21,6 +21,7 @@ Untitled Repo
     <button id="btn-auth-repo">Edit</button>
     {% endif %}
 </div>
+{% if session['working_repo'] == repo.access_key %}
 <div id="repo-edit-div" hidden>
     <form id="repo-edit-form">
         <label for="repo-title-input">Title</label>
@@ -39,6 +40,7 @@ Untitled Repo
         <button>Save</button>
     </form>
 </div>
+{% endif %}
 <div id="content">
     <h1 id="repo-title"></h1>
     <p id="repo-desc"></p>
@@ -46,7 +48,7 @@ Untitled Repo
         <ul id='repo-entry-list'></ul>
     </div>
 </div>
-<!-- To Do: Re-name this to entry-edit-div -->
+{% if session['working_repo'] == repo.access_key %}
 <div id="entry-edit-div" hidden>
     <form id="entry-edit-form">
         <label for="entry-title-input">Title</label>
@@ -66,6 +68,7 @@ Untitled Repo
         <button>Done</button>
     </form>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block script %}

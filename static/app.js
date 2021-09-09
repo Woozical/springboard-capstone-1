@@ -2,6 +2,7 @@ const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
 // TO DO: Error handling, API response flashing, load-in spinner
+// TO DO: Entry sorting, re-ordering
 
 class Entry {
     static idGen = Entry.generateID();
@@ -113,7 +114,7 @@ class Repo {
 
         this.entries.forEach(
             (entry, index) => {
-                if (entry.state != 'DELETE'){ // Don't render entries marked for deletion
+                if (entry.state != 'DELETE' && entry.state != '_DELETED'){ // Don't render entries marked for deletion
                     const li = document.createElement('li');
                     li.id = `entry_${index}`;
                     li.innerHTML = entry.generateMarkup(index);
@@ -193,29 +194,61 @@ class Repo {
         document.getElementById('repo-edit-div').hidden = true;
     }
 
-    commitEntryChanges(){
+    async commitEntryChanges(){
         // parse repo changes and send to server
-        const toAdd = [];
-        const toChange = [];
-        const toDelete = [];
+        // array[0] = array of json data to send to server
+        // array[1] = references to Entry objects
+        const toAdd = [[], []];
+        const toChange = [[], []];
+        const toDelete = [[], []];
         for (let entry of this.entries){
             switch (entry.state){
                 case 'NEW':
-                    toAdd.push(Entry.toJSON(entry));
+                    toAdd[0].push(Entry.toJSON(entry));
+                    toAdd[1].push(entry);
                     break;
                 case 'CHANGE':
-                    toChange.push(Entry.toJSON(entry));
+                    toChange[0].push(Entry.toJSON(entry));
+                    toChange[1].push(entry);
                     break;
                 case 'DELETE':
-                    toDelete.push(entry.id);
+                    toDelete[0].push(entry.id);
+                    toDelete[1].push(entry);
                     break;
             }
         }
         const endPoint = `/api/repo/${this.accessKey}/entries`;
-        if (toAdd.length > 0) axios.post(`${endPoint}/new`, {'new' : toAdd});
-        if (toChange.length > 0) axios.patch(endPoint, {'change' : toChange});
-        if (toDelete.length > 0) axios.delete(endPoint, {data : {'delete' : toDelete }});
+        try {
+            if (toAdd[0].length > 0){
+                await axios.post(`${endPoint}/new`, {'new' : toAdd[0]});
+                for (let entry of toAdd[1]){
+                    entry.state = 'UPDATED';
+                }
+            }
+
+            if (toChange[0].length > 0){
+                await axios.patch(endPoint, {'change' : toChange[0]});
+                for (let entry of toChange[1]){
+                entry.state = 'UPDATED';
+                }
+            }
+
+            if (toDelete[0].length > 0){
+                await axios.delete(endPoint, {data: {'delete' : toDelete[0]}});
+                for (let entry of toDelete[1]){
+                    entry.state = '_DELETED';
+                }
+            }
+            flash('Changes saved.');
+
+        } catch {
+            flash('Something went wrong.');
+        }
     }
+}
+
+function flash(message){
+    document.getElementById('flashes').innerText = message;
 }
 
 async function loadRepoData(accessKey){
@@ -234,7 +267,6 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
-        repo.commitEntryChanges();
         // Only setup editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);

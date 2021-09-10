@@ -34,7 +34,7 @@ class Entry {
         // TO DO: markup styling
         // TO DO: no anchor tag if this.url is null
         const img = this.image ? this.image : NOIMG;
-        let markup = ''
+        let markup = '';
         switch (this.type){
             case 'link':
                 markup = '<div>';
@@ -44,7 +44,7 @@ class Entry {
                     <button id="edit_${index}">Edit</button>`;
                 }
                 markup = markup + `
-                <img src="${img}" width=50 height=50>
+                <img src="${img}" onerror="imgError(this);" width=50 height=50>
                 <a href="${this.url}">${this.title}</a>
                 </div>`;
                 break;
@@ -157,15 +157,13 @@ class Repo {
         // once we have metadata, refresh entry to show it
         const scrape = await axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} });
         const metaData = scrape.data.data;
-        console.log(metaData);
         const data = {
             id: null, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
-            image: metaData.image, url: url, entry_type: 'link',
+            image: metaData.image, url: metaData.url ? metaData.url : url, entry_type: 'link',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
         this.refreshEntryList();
-        console.log(this);
     }
 
     deleteEntry(entryIndex){
@@ -219,8 +217,10 @@ class Repo {
         }
         const endPoint = `/api/repo/${this.accessKey}/entries`;
         try {
+            let changes = false;
             if (toAdd[0].length > 0){
                 await axios.post(`${endPoint}/new`, {'new' : toAdd[0]});
+                changes=true;
                 for (let entry of toAdd[1]){
                     entry.state = 'UPDATED';
                 }
@@ -228,6 +228,7 @@ class Repo {
 
             if (toChange[0].length > 0){
                 await axios.patch(endPoint, {'change' : toChange[0]});
+                changes=true;
                 for (let entry of toChange[1]){
                 entry.state = 'UPDATED';
                 }
@@ -235,20 +236,39 @@ class Repo {
 
             if (toDelete[0].length > 0){
                 await axios.delete(endPoint, {data: {'delete' : toDelete[0]}});
+                changes=true;
                 for (let entry of toDelete[1]){
                     entry.state = '_DELETED';
                 }
             }
-            flash('Changes saved.');
+            
+            if (changes){
+                flash('Changes saved.');
+            }
+            else{
+                flash('Repo up to date.');
+            }
 
-        } catch {
-            flash('Something went wrong.');
+        } catch (err) {
+            throw `Could not save changes. Error msg: ${err}`;
         }
     }
 }
-
+let flashTimer
 function flash(message){
-    document.getElementById('flashes').innerText = message;
+    clearInterval(flashTimer);
+    const flashDiv = document.getElementById('flashes');
+    flashDiv.innerHTML = `<p>${message}</p>`;
+    flashTimer = setTimeout(()=>{
+        flashDiv.innerHTML = '';
+    }, 2000);
+}
+
+// Replace broken link thumbnails with generic globe image
+function imgError(image){
+    image.src = NOIMG;
+    image.onerror = "";
+    return true;
 }
 
 async function loadRepoData(accessKey){
@@ -293,25 +313,42 @@ function initEditEventListeners(repo){
         const link = newLinkForm.new.value;
         repo.addLink(link);
         newLinkForm.new.value = '';
+        window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
     });
 
     repoEditForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        repo.commitRepoChanges();
+        try{
+            repo.commitRepoChanges();
+            flash('Changes saved.');
+        } catch {
+            flash('Something went wrong. Please try again later.');
+        }
     });
+}
 
+function unSavedChangesHandler(evt){
+    evt.preventDefault();
+    return evt.returnValue = 'Are you sure you want to exit? This repo has unsaved changes.';
 }
 
 function controlEventHandler(evt, repo){
     switch (evt.target.id){
         case 'btn-new-divide':
             repo.addDivider();
+            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
             break;
         case 'btn-new-tbox':
             repo.addTextBox();
+            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
             break;
         case 'btn-save-changes':
-            repo.commitEntryChanges();
+            try{
+                repo.commitEntryChanges();
+                window.removeEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            } catch {
+                flash("Something went wrong. Please try again later.")
+            }
             break;
         case 'btn-edit-repo':
             const div = document.getElementById('repo-edit-div')
@@ -357,6 +394,7 @@ function entryEditSubmitHandler(evt, repo){
     entryEditForm.entryType.value = '';
     entryEditForm.entryImage.value = '';
     document.getElementById('entry-edit-div').hidden = true;
+    window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
     repo.refreshEntryMarkup(entryIndex);
 }
 

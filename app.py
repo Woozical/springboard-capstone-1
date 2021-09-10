@@ -29,7 +29,6 @@ def home_view():
 
 @app.route('/repo/<access_key>')
 def repo_view(access_key):
-    # To Do: Put auth for private repo here
     repo = Repo.query.get_or_404(access_key)
     if repo.is_private and ('working_repo' not in session or session['working_repo'] != access_key):
         return redirect(url_for('repo_auth', access_key=access_key))
@@ -55,27 +54,31 @@ def repo_auth():
     return render_template('/forms/auth-repo.html', form=form)
 
 
-@app.route('/repo/create', methods=['GET', 'POST'])
+@app.route('/repo/create', methods=['POST'])
 def repo_create():
-    # TO DO: This should only return the HTML on json requests
-    # (To prevent users from navigating directly to /repo/create)
-    # If the repo creation form lives on landing page, this route can be POST only
     form = NewRepoForm()
     if form.validate_on_submit():
-        new_repo = Repo.create(
-            pass_phrase = form.pass_phrase.data,
-            title = form.title.data,
-            description = form.description.data,
-            is_private = form.is_private.data
-        )
-        db.session.add(new_repo)
-        db.session.commit()
+        # On the miniscule chance we generate a non-unique access key, loop and try again.
+        success = False
+        while not success:
+            new_repo = Repo.create(
+                pass_phrase = form.pass_phrase.data,
+                title = form.title.data,
+                description = form.description.data,
+                is_private = form.is_private.data
+            )
+            db.session.add(new_repo)
+            try:
+                db.session.commit()
+                success = True
+            except:
+                success = False
         session['working_repo'] = new_repo.access_key
         return redirect(
             url_for('repo_view', access_key=new_repo.access_key)
         )
     else:
-        return render_template('/forms/create-repo.html', form=form)
+        return redirect(url_for('home_view'))
 
 @app.route('/forms/auth-repo', methods=['GET'])
 def repo_auth_form():
@@ -87,9 +90,8 @@ def repo_auth_form():
 
 @app.route('/api/scrape')
 def api_scrape_url():
-    # TO-DO: Add CSRF security to prevent direct access to this endpoitn
-    # TO-DO: If resource isn't HTML (i.e. image), do special stuff
-    print(request.args['url'])
+    # TO-DO: Add CSRF security to prevent direct access to this endpoint?
+    # TO-DO: Implement opengraphr API
     meta_data = get_tags(request.args['url'])
     return jsonify(msg="success", data=meta_data)
 

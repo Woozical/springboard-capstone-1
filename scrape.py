@@ -1,10 +1,32 @@
 import requests
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
+from requests.exceptions import MissingSchema, ConnectionError
 
 def get_tags(url:str):
-    url = unquote(url)
-    res = requests.get(url)
-    return parse_HTML(res.text)
+    p_url = unquote(url)
+    pr = urlparse(p_url)
+    # Missing/incorrect schema
+    if not pr.scheme :
+        p_url = "http://" + p_url
+    elif pr.scheme != 'http' and pr.scheme != 'https':
+        return {'title' : pr.netloc} if pr.netloc else {'title': p_url}
+
+    try:
+        res = requests.get(p_url)
+        print(res.headers)
+        if res.status_code == 200:
+            if res.headers['content-type'] in {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}:
+                return {'title' : p_url, 'image' : p_url, 'url' : p_url}
+            elif 'text/html' in res.headers['content-type']:
+                return parse_HTML(res.text)
+            else:
+                return {'title' : p_url}
+        else:
+            print('fail non-200')
+            return {'title' : url, 'description' : ''}
+    except ConnectionError:
+        print('fail Connection Error')
+        return {'title': p_url}
 
 def parse_HTML(content):
     tags = {}

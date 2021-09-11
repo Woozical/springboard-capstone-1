@@ -50,6 +50,7 @@ class Repo(db.Model):
     
     def update_last_visited(self):
         self.last_visited = datetime.now()
+        db.session.commit()
 
     def to_json(self):
         entries = []
@@ -61,7 +62,7 @@ class Repo(db.Model):
             "title" : self.title,
             "description" : self.description,
             "is_private" : self.is_private,
-            "last_visisted" : self.last_visited,
+            "last_visited" : self.last_visited,
             "entries" : entries
         }
 

@@ -36,6 +36,7 @@ def repo_view(access_key):
     if repo.is_private and ('working_repo' not in session or session['working_repo'] != access_key):
         return redirect(url_for('repo_auth', access_key=access_key))
     else:
+        repo.update_last_visited()
         return render_template('repo.html', repo=repo)
 
 @app.route('/repo/auth', methods=['GET', 'POST'])
@@ -202,7 +203,6 @@ def api_repo_patch(access_key):
         db.session.rollback()
         return jsonify(errors=errors), 400
     else:
-        repo.update_last_visited()
         db.session.commit()
         return jsonify(message='success', repo=repo.to_json())
 
@@ -237,7 +237,6 @@ def api_repo_new_entries(access_key):
         return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
     db.session.add_all(new_entries)
-    repo.update_last_visited()
     db.session.commit()
     return jsonify(msg=f"Success. Created {len(new_entries)} on {access_key}"), 201
 
@@ -276,7 +275,6 @@ def api_entries_patch(access_key):
     except KeyError as err:
         return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
-    repo.update_last_visited()
     db.session.commit()
     return jsonify(msg=f"Success. Updated {len(data['change'])} on {access_key}")
 
@@ -307,6 +305,5 @@ def api_entries_deletion(access_key):
     except KeyError as err:
         return jsonify(error=err.message), 400
     
-    repo.update_last_visited()
     db.session.commit()
     return jsonify(msg=f"Success. Deleted {len(data['delete'])} on {access_key}")

@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase
 from sqlalchemy.exc import IntegrityError, DataError
-from models import db, Entry, Repo
+from models import db, Entry, Repo, EntryType
 from datetime import datetime
 
 # Set db to testing db prior to app import
@@ -117,3 +117,94 @@ class RepoModelTestCase(TestCase):
 
         self.assertFalse(Repo.authenticate('hjs09rjthsg', 'pw')) # return false on non-existant repo
         self.assertFalse(Repo.authenticate(key, repo.pass_phrase)) # should not authenticate on passing in hash
+    
+    def test_json_serialize(self):
+        """JSON method must return a python dictionary containing repo info"""
+
+        repo = Repo.query.get('123abc')
+        repo_json = repo.to_json()
+
+        # Password hash must NOT be returned in json
+        self.assertFalse(repo.pass_phrase in repo_json.values())
+
+        self.assertEqual(repo.access_key, repo_json['access_key'])
+        self.assertEqual(repo.title, repo_json['title'])
+        self.assertEqual(repo.description, repo_json['description'])
+        self.assertEqual(repo.last_visited, repo_json['last_visited'])
+        self.assertEqual(len(repo.entries), len(repo_json['entries']))
+
+class EntryModelTestCase(TestCase):
+    def setUp(self):
+        # Clean old data
+        Entry.query.delete()
+        Repo.query.delete()
+
+        # New sample data
+        repo = Repo(access_key='123abc', pass_phrase='password', title='Test Repo', description='Test Desc')
+        db.session.add(repo)
+        db.session.commit()
+
+        entry = Entry(title="entry title", repo_access_key="123abc")
+        db.session.add(entry)
+        db.session.commit()
+
+        self.entry_id = entry.id
+    
+    def tearDown(self):
+        # Clean failed transactions
+        db.session.rollback()
+    
+    def test_fields(self):
+        # Entry Type defaults to 'link'
+        self.assertEqual(
+            Entry.query.get(self.entry_id).entry_type, EntryType.link
+        )
+
+        # Entry Type must be 'link', 'text_box', or 'divider'
+        with self.assertRaises(DataError):
+            new_entry = Entry(title="new title", entry_type="flargenstow", repo_access_key="123abc")
+            db.session.add(new_entry)
+            db.session.commit()
+        
+        db.session.rollback()
+        
+        # repo_access_key must not be null
+        with self.assertRaises(IntegrityError):
+            new_entry = Entry(title="new title")
+            db.session.add(new_entry)
+            db.session.commit()
+        
+    def test_enum_toStr(self):
+        """Ensure the enum to string dictionary on Entry class works"""
+        entry = Entry.query.get(self.entry_id)
+        self.assertEqual(
+            Entry.type_to_string[entry.entry_type], 'link'
+        )
+
+        entry.entry_type = EntryType.text_box
+        self.assertEqual(
+            Entry.type_to_string[entry.entry_type], 'text_box'
+        )
+
+        entry.entry_type = EntryType.divider
+        self.assertEqual(
+            Entry.type_to_string[entry.entry_type], 'divider'
+        )
+    
+    def test_json_serialize(self):
+        entry = Entry.query.get(self.entry_id)
+        entry_json = entry.to_json()
+
+        self.assertEqual(entry.id, entry_json['id'])
+        self.assertEqual(entry.title, entry_json['title'])
+        self.assertEqual(entry.description, entry_json['description'])
+        self.assertEqual(entry.image, entry_json['image'])
+        self.assertEqual(entry.url, entry_json['url'])
+        self.assertEqual(entry.rating, entry_json['rating'])
+        self.assertEqual(entry.sequence, entry_json['sequence'])
+
+        self.assertEqual(
+            Entry.type_to_string[entry.entry_type], entry_json['entry_type']
+        )
+
+

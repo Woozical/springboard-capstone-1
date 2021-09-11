@@ -1,13 +1,20 @@
 <form action="/repo/create" method="POST">
     {{ form.hidden_tag() }}
-    {{form.title.label}}
-    {{form.title()}}
-    {{form.description.label}}
-    {{form.description()}}
-    <br>
-    {{form.pass_phrase.label}}
-    {{form.pass_phrase()}}
-    {{form.is_private.label}}
-    {{form.is_private()}}
-    <button>Submit</button>
+    <div class="form-group">
+        {{form.title.label}}
+        {{form.title(class="form-control form-control-lg")}}
+    </div>
+    <div class="form-group">
+        {{form.description.label}}
+        {{form.description(class="form-control")}}
+    </div>
+    <div class="form-group">
+        {{form.pass_phrase.label}}
+        {{form.pass_phrase(class="form-control form-control-lg")}}
+    </div>
+    <div class="form-group">
+        {{form.is_private.label(class="form-check-label")}}
+        {{form.is_private(class="form-check-input")}}
+    </div>
+    <button class="btn btn-success">Create</button>
 </form>

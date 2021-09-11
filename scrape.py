@@ -13,7 +13,6 @@ def get_tags(url:str):
 
     try:
         res = requests.get(p_url)
-        print(res.headers)
         if res.status_code == 200:
             if res.headers['content-type'] in {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}:
                 return {'title' : p_url, 'image' : p_url, 'url' : p_url}

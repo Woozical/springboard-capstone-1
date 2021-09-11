@@ -3,17 +3,18 @@ const AUTH = {view : 0, edit : 1} // For rendering purposes
 
 // TO DO: load-in spinner
 // TO DO: Entry sorting, re-ordering, rating
+// TO DO: Delete repo
 
 class Entry {
     // TO DO: Make url a URL object, and make use of those properties
     static idGen = Entry.generateID();
-    constructor({id, title, description, image, url, entry_type, rating, sequence}, state){
+    constructor({id, title, description, image, url, type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
         this.title = title;
         this.description = description;
         this.image= image;
         this.url = url;
-        this.type = entry_type;
+        this.type = type;
         this.rating = rating;
         this.sequence = sequence;
         this.state = state;
@@ -104,7 +105,6 @@ class Repo {
         }
 
         this.sortEntries();
-        console.log(this);
     }
 
     sortEntries(sortType='sequence'){
@@ -145,7 +145,7 @@ class Repo {
     addDivider(){
         const data = {
             id : null, title: 'New Divider', description: null,
-            image: null, url: null, entry_type: 'divider',
+            image: null, url: null, type: 'divider',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
@@ -155,7 +155,7 @@ class Repo {
     addTextBox(){
         const data = {
             id : null, title: 'New Text Box', description: '...',
-            image: null, url: null, entry_type: 'text_box',
+            image: null, url: null, type: 'text_box',
             rating: null, sequence: this.entries.length
         };
         this.entries.push(new Entry(data, 'NEW'));
@@ -168,7 +168,7 @@ class Repo {
         // once we have metadata, refresh entry to show it
         const newEntryIdx = this.entries.length;
         const data = {id: null, title: url, description: null, image: null,
-            url: url, entry_type: 'link', rating: null, sequence: newEntryIdx}
+            url: url, type: 'link', rating: null, sequence: newEntryIdx}
         const newEntry = new Entry(data, 'NEW');
         this.entries.push(newEntry);
         this.refreshEntryList();

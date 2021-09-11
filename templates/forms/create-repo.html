@@ -1,20 +1,38 @@
-<form action="/repo/create" method="POST">
+<form action="/repo/create" method="POST" id='create-form'>
     {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{form.title.label}}
-        {{form.title(class="form-control form-control-lg")}}
+    <div class="row">
+        <div class="col-8">
+            {{form.title.label}}
+            {{form.title(class="form-control form-control-lg", placeholder="(Optional)")}}
+            <small class="text-danger" id="title-errors"> </small>
+        </div>
+        <div class="col">
+            {{form.pass_phrase.label}}
+            <small class="text-secondary">(*) <i>Users must enter the password to edit the repository.</i></small>
+            {{form.pass_phrase(class="form-control form-control-lg", placeholder="Required")}}
+            <input type="checkbox" name="show_pw" id="show-pw-input">
+            <label for="show-pw-input">Show</label>
+            <small class="text-danger" id="pass_phrase-errors"> </small>
+        </div>
     </div>
-    <div class="form-group">
-        {{form.description.label}}
-        {{form.description(class="form-control")}}
+    <div class="row">
+        <div class="col">
+            {{form.description.label}}
+            {{form.description(class="form-control", placeholder="(Optional)")}}
+            <small class="text-danger" id="description-errors"> </small>
+        </div>
     </div>
-    <div class="form-group">
-        {{form.pass_phrase.label}}
-        {{form.pass_phrase(class="form-control form-control-lg")}}
+    <br>
+    <div class="row">
+        <div class="col">
+            {{form.is_private.label(class="form-check-label")}}
+            {{form.is_private(class="form-check-input")}}
+            <small class="text-secondary">
+                The password must be entered to view the repository. <br>
+                Note: This still gives editing access.
+            </small>
+        </div>
     </div>
-    <div class="form-group">
-        {{form.is_private.label(class="form-check-label")}}
-        {{form.is_private(class="form-check-input")}}
-    </div>
+    <br>
     <button class="btn btn-success">Create</button>
 </form>

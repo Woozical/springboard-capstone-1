@@ -23,10 +23,12 @@ db.create_all()
 
 ## Front-end Layer
 
+
 @app.route('/')
 def home_view():
     form = NewRepoForm()
     session['SameSite'] = 'Strict'
+
     return render_template('home.html', form=form)
 
 @app.route('/repo/<access_key>')
@@ -57,7 +59,7 @@ def repo_auth():
         
     return render_template('/forms/auth-repo.html', form=form)
 
-
+## DEPREC? ##
 @app.route('/repo/create', methods=['POST'])
 def repo_create():
     form = NewRepoForm()
@@ -95,6 +97,31 @@ def api_scrape_url():
         return jsonify(msg="success", data=meta_data)
     else:
         return jsonify(msg="failure, unauthorized"), 401
+
+@app.route('/api/repo/create', methods=['POST'])
+def api_repo_create():
+    form = NewRepoForm()
+    if form.validate_on_submit():
+        # On the miniscule chance we generate a non-unique access key, loop and try again.
+        success = False
+        while not success:
+            new_repo = Repo.create(
+                pass_phrase = form.pass_phrase.data,
+                title = form.title.data,
+                description = form.description.data,
+                is_private = form.is_private.data
+            )
+            db.session.add(new_repo)
+            try:
+                db.session.commit()
+                success = True
+            except:
+                db.session.rollback()
+                success = False
+        session['working_repo'] = new_repo.access_key
+        return jsonify(message='success', created=new_repo.access_key)
+    else:
+        return jsonify(message="failed", errors=form.errors_to_json()), 400
 
 
 @app.route('/api/repo/<access_key>', methods=['GET'])

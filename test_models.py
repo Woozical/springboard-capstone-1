@@ -157,12 +157,12 @@ class EntryModelTestCase(TestCase):
     def test_fields(self):
         # Entry Type defaults to 'link'
         self.assertEqual(
-            Entry.query.get(self.entry_id).entry_type, EntryType.link
+            Entry.query.get(self.entry_id).type, EntryType.link
         )
 
         # Entry Type must be 'link', 'text_box', or 'divider'
         with self.assertRaises(DataError):
-            new_entry = Entry(title="new title", entry_type="flargenstow", repo_access_key="123abc")
+            new_entry = Entry(title="new title", type="flargenstow", repo_access_key="123abc")
             db.session.add(new_entry)
             db.session.commit()
         
@@ -178,17 +178,17 @@ class EntryModelTestCase(TestCase):
         """Ensure the enum to string dictionary on Entry class works"""
         entry = Entry.query.get(self.entry_id)
         self.assertEqual(
-            Entry.type_to_string[entry.entry_type], 'link'
+            Entry.type_to_string[entry.type], 'link'
         )
 
-        entry.entry_type = EntryType.text_box
+        entry.type = EntryType.text_box
         self.assertEqual(
-            Entry.type_to_string[entry.entry_type], 'text_box'
+            Entry.type_to_string[entry.type], 'text_box'
         )
 
-        entry.entry_type = EntryType.divider
+        entry.type = EntryType.divider
         self.assertEqual(
-            Entry.type_to_string[entry.entry_type], 'divider'
+            Entry.type_to_string[entry.type], 'divider'
         )
     
     def test_json_serialize(self):
@@ -204,7 +204,7 @@ class EntryModelTestCase(TestCase):
         self.assertEqual(entry.sequence, entry_json['sequence'])
 
         self.assertEqual(
-            Entry.type_to_string[entry.entry_type], entry_json['entry_type']
+            Entry.type_to_string[entry.type], entry_json['type']
         )
 
 

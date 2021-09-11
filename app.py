@@ -25,7 +25,6 @@ db.create_all()
 
 @app.route('/')
 def home_view():
-    print(session.permanent)
     form = NewRepoForm()
     session['SameSite'] = 'Strict'
     return render_template('home.html', form=form)
@@ -229,7 +228,7 @@ def api_repo_new_entries(access_key):
                 Entry(
                     title=entry['title'], description=entry.get('description'),
                     image=entry.get('image'), url=entry.get('url'),
-                    entry_type=entry['type'], rating=entry.get('rating'),
+                    type=entry['type'], rating=entry.get('rating'),
                     sequence=entry.get('sequence'), repo_access_key=access_key
                 )
             )
@@ -269,7 +268,7 @@ def api_entries_patch(access_key):
             db_entry.description = entry.get('description', db_entry.description)
             db_entry.image = entry.get('image', db_entry.image)
             db_entry.url = entry.get('url', db_entry.url)
-            db_entry.entry_type = entry.get('type', db_entry.entry_type)
+            db_entry.type = entry.get('type', db_entry.type)
             db_entry.rating = entry.get('rating', db_entry.rating)
             db_entry.sequence = entry.get('sequence', db_entry.sequence)
     except KeyError as err:

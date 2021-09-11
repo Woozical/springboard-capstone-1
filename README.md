@@ -9,11 +9,11 @@ The data involved is primarily scraped OpenGraph metadata from websites used to 
 
 __Entries__
 
-| id | title | description | image | url | entry_type | rating | sequence | repo_access_key |
+| id | title | description | image | url | type | rating | sequence | repo_access_key |
 --- | --- | --- | --- | --- | --- | --- | --- | ---
 | PK | Text | Text, Nullable | Text, Nullable | Text | enum default='url' | Integer, Nullable | Integer, Nullable | Text FK(repo.access_key), OD=Cascade |
 
-entry_type refers to an enumerated type that defines how the entry is styled. By default, most entries will be simple links styled similar to twitter/facebook link cards. However, a user may opt to style an entry like a horizontal ruler, or a header, or a text box, to better organize their repo.
+`type` refers to an enumerated type that defines how the entry is styled. By default, most entries will be simple links styled similar to twitter/facebook link cards. However, a user may opt to style an entry like a horizontal ruler, or a header, or a text box, to better organize their repo.
 
 rating refers to a user defined rating of a particular entry. Users may increase or decrease the rating of an entry to signify its importance.
 

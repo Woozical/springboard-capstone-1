@@ -75,7 +75,7 @@ class Entry(db.Model):
     description = db.Column(db.Text)
     image = db.Column(db.Text)
     url = db.Column(db.Text)
-    entry_type = db.Column(db.Enum(EntryType), nullable=False, default='link')
+    type = db.Column(db.Enum(EntryType), nullable=False, default='link')
     rating = db.Column(db.Integer)
     sequence = db.Column(db.Integer)
     repo_access_key = db.Column(db.Text, db.ForeignKey('repos.access_key', ondelete="CASCADE"), nullable=False)
@@ -93,7 +93,7 @@ class Entry(db.Model):
             "description" : self.description,
             "image" : self.image,
             "url" : self.url,
-            "entry_type" : Entry.type_to_string[self.entry_type],
+            "type" : Entry.type_to_string[self.type],
             "rating" : self.rating,
             "sequence" : self.sequence,
         }

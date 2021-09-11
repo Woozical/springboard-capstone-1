@@ -319,10 +319,15 @@ function initEditEventListeners(repo){
     const entryEditForm = document.getElementById('entry-edit-form');
     const newLinkForm = document.getElementById('new-link-form');
     const repoEditForm = document.getElementById('repo-edit-form');
+    const repoDeleteForm = document.getElementById('repo-delete-form');
 
     controls.addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
     entryList.addEventListener('click', (evt) => {entriesEventHandler(evt, repo)});
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
+    repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
+    
+    document.getElementById('btn-close-repo-delete').addEventListener('click', () => {
+        document.getElementById('repo-delete-div').hidden = true});
     
     newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
@@ -347,7 +352,7 @@ function unSavedChangesHandler(evt){
     evt.preventDefault();
     return evt.returnValue = 'Are you sure you want to exit? This repo has unsaved changes.';
 }
-
+// Event handler for the control panel
 function controlEventHandler(evt, repo){
     switch (evt.target.id){
         case 'btn-new-divide':
@@ -374,7 +379,24 @@ function controlEventHandler(evt, repo){
         case 'btn-auth-repo':
             window.location =`/repo/auth?access_key=${repo.accessKey}`; 
             break;
+        case "btn-delete-repo":
+            document.getElementById('repo-delete-div').hidden = false;
+            break;
     }
+}
+
+async function deleteConfirmationHandler(evt, repo){
+    evt.preventDefault();
+    const pw = evt.target.pass_phrase.value;
+    await axios.delete(`/api/repo/${repo.accessKey}`, {data: {'pass_phrase' : pw}})
+    .then( function(response){
+        if (response.status === 200) window.location = '/';
+    })
+    .catch( function(){
+        document.getElementById('repo-delete-response').innerText = 'Incorrect pass phrase';
+        evt.target.pass_phrase.value = '';
+        }
+    );
 }
 
 function entriesEventHandler(evt, repo){

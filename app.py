@@ -84,11 +84,6 @@ def repo_create():
     else:
         return redirect(url_for('home_view'))
 
-@app.route('/forms/auth-repo', methods=['GET'])
-def repo_auth_form():
-    form = AuthRepoForm()
-    return render_template('/forms/auth-repo.html', form=form)
-
 
 ### API Layer ###
 
@@ -150,7 +145,7 @@ def api_repo_delete(access_key):
     
     db.session.delete(repo)
     db.session.commit()
-    return jsonify(message=f"success. {access_key} deleted.")
+    return jsonify(message=f"success. {access_key} deleted."), 200
 
 @app.route('/api/repo/<access_key>', methods=['PATCH'])
 def api_repo_patch(access_key):

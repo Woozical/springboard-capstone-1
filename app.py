@@ -3,6 +3,7 @@ from flask import Flask, session, render_template, request, redirect, url_for, j
 from models import db, connect_db, Repo, Entry
 from forms import AuthRepoForm, NewRepoForm
 from scrape import get_tags
+from datetime import timedelta
 
 app = Flask(__name__)
 
@@ -15,6 +16,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 connect_db(app)
 db.create_all()
@@ -23,6 +25,7 @@ db.create_all()
 
 @app.route('/')
 def home_view():
+    print(session.permanent)
     form = NewRepoForm()
     session['SameSite'] = 'Strict'
     return render_template('home.html', form=form)
@@ -47,6 +50,7 @@ def repo_auth():
     if form.validate_on_submit():
         if Repo.authenticate(repo.access_key, form.pass_phrase.data):
             session['working_repo'] = repo.access_key
+            session.permanent = True
             return redirect(url_for('repo_view', access_key=repo.access_key))
         else:
             flash('Wrong password')
@@ -90,10 +94,12 @@ def repo_auth_form():
 
 @app.route('/api/scrape')
 def api_scrape_url():
-    # TO-DO: Add CSRF security to prevent direct access to this endpoint?
-    # TO-DO: Implement opengraphr API
-    meta_data = get_tags(request.args['url'])
-    return jsonify(msg="success", data=meta_data)
+    # TO-DO: Implement opengraphr API to plug metadata gaps
+    if 'working_repo' in session:
+        meta_data = get_tags(request.args['url'])
+        return jsonify(msg="success", data=meta_data)
+    else:
+        return jsonify(msg="failure, unauthorized"), 401
 
 
 @app.route('/api/repo/<access_key>', methods=['GET'])
@@ -128,7 +134,7 @@ def api_repo_auth():
 def api_repo_delete(access_key):
     repo = Repo.query.get(access_key)
     data = request.get_json()
-    ### TO DO: Make a function to handle json playod for 404, json validation, and auth
+    ### TO DO: Make a function to handle json payload for 404, json validation, and auth
     
     if not repo:
         return jsonify(error="Repo not found"), 404
@@ -304,19 +310,3 @@ def api_entries_deletion(access_key):
     repo.update_last_visited()
     db.session.commit()
     return jsonify(msg=f"Success. Deleted {len(data['delete'])} on {access_key}")
-
-# @app.route('/api/entry/<int:id>', methods=['DELETE'])
-# def api_entry_delete(id):
-#     entry = Entry.query.get(id)
-#     if not entry:
-#         return jsonify(error="Entry not found"), 404
-
-#     if not 'working_repo' in session:
-#         return jsonify(error="Unauthorized"), 401
-    
-#     if session['working_repo'] != entry.repo_access_key:
-#         return jsonify(error="Unauthorized"), 403
-    
-#     db.session.delete(entry)
-#     db.session.commit()
-#     return jsonify(msg=f"success. entrty {id} deleted")

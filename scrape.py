@@ -1,6 +1,6 @@
 import requests
 from urllib.parse import unquote, urlparse
-from requests.exceptions import MissingSchema, ConnectionError
+from requests.exceptions import ConnectionError
 
 def get_tags(url:str):
     p_url = unquote(url)
@@ -22,11 +22,11 @@ def get_tags(url:str):
             else:
                 return {'title' : p_url}
         else:
-            print('fail non-200')
-            return {'title' : url, 'description' : ''}
+            print(f'scrape fail non-200: {url}')
+            return {'url' : p_url}
     except ConnectionError:
-        print('fail Connection Error')
-        return {'title': p_url}
+        print(f'scrape fail Connection Error: {url}')
+        return {'url' : p_url}
 
 def parse_HTML(content):
     tags = {}

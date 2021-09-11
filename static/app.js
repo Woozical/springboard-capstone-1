@@ -1,10 +1,11 @@
 const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
-// TO DO: Error handling, API response flashing, load-in spinner
-// TO DO: Entry sorting, re-ordering
+// TO DO: load-in spinner
+// TO DO: Entry sorting, re-ordering, rating
 
 class Entry {
+    // TO DO: Make url a URL object, and make use of those properties
     static idGen = Entry.generateID();
     constructor({id, title, description, image, url, entry_type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
@@ -28,6 +29,17 @@ class Entry {
 
    static toJSON({id, title, description, image, url, type, rating, sequence}){
         return {id, title, description, image, url, type, rating, sequence};
+    }
+
+    updateWithMetaData(metaData){
+        if (metaData.title) {
+            this.title = metaData.title;
+        } else if (metaData.site_name) {
+            this.title = metaData.site_name;
+        }
+        this.description = metaData.description ? metaData.description : this.description;
+        this.image = metaData.image ? metaData.image : this.image;
+        this.url = metaData.url ? metaData.url : this.url;
     }
 
     generateMarkup(index){
@@ -151,19 +163,23 @@ class Repo {
     }
 
     async addLink(url){
+        // add new link entry to the DOM
         // scrape data on URL through server
-        // TO-DO: make sure outgoing url has schema, no metadata request if not
-        // set-up so that we don't wait on metadata to show the entry
         // once we have metadata, refresh entry to show it
-        const scrape = await axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} });
-        const metaData = scrape.data.data;
-        const data = {
-            id: null, title: metaData.title ? metaData.title : metaData.site_name, description: metaData.description,
-            image: metaData.image, url: metaData.url ? metaData.url : url, entry_type: 'link',
-            rating: null, sequence: this.entries.length
-        };
-        this.entries.push(new Entry(data, 'NEW'));
+        const newEntryIdx = this.entries.length;
+        const data = {id: null, title: url, description: null, image: null,
+            url: url, entry_type: 'link', rating: null, sequence: newEntryIdx}
+        const newEntry = new Entry(data, 'NEW');
+        this.entries.push(newEntry);
         this.refreshEntryList();
+        
+        const repo = this;
+        axios.get('/api/scrape', { params: {'url' : encodeURIComponent(url)} }).then(
+            function (response){
+                newEntry.updateWithMetaData(response.data.data);
+                repo.refreshEntryMarkup(newEntryIdx);
+            }
+        );
     }
 
     deleteEntry(entryIndex){
@@ -287,7 +303,7 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
-        // Only setup editing listeners if we're authorized to edit
+        // Only bother with setting up editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
         } else {

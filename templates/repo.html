@@ -17,11 +17,24 @@ Untitled Repo
     <button id="btn-new-tbox">Add TextBox</button>
     <button id="btn-save-changes">Save Changes</button>
     <button id="btn-edit-repo">Edit Repo Info</button>
+    <button id="btn-delete-repo">Delete Repo</button>
     {% else %}
     <button id="btn-auth-repo">Edit</button>
     {% endif %}
 </div>
 {% if session['working_repo'] == repo.access_key %}
+<!-- To Do: Make forms modals -->
+<div id="repo-delete-div" hidden>
+    <button id="btn-close-repo-delete">X</button>
+    <form id="repo-delete-form">
+        Are you sure you want to delete this repository?
+        This action is not reversable.
+        <p id='repo-delete-response'></p>
+        <label for="repo-delete-pw">Enter pass phrase to confirm:</label>
+        <input type="password" id="repo-delete-pw" name="pass_phrase">
+        <button>Confirm</button>
+    </form>
+</div>
 <div id="repo-edit-div" hidden>
     <form id="repo-edit-form">
         <label for="repo-title-input">Title</label>

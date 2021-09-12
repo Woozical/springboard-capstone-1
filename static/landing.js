@@ -2,6 +2,8 @@ function app(){
     const createDiv = document.getElementById('create-div');
     const createBtn = document.getElementById('create-btn');
     const createForm = document.getElementById('create-form');
+
+    createBtn.hidden = false;
     
     function toggleFormVisibility(){
         createDiv.hidden = !createDiv.hidden;

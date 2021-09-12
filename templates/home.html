@@ -8,11 +8,15 @@ LinkBin
 <div class="container">
     <h1>Welcome!</h1>
     <p>This is the landing page</p>
-    <button class="btn btn-lg btn-primary" id="create-btn">New Repository</button>
+    <button class="btn btn-lg btn-primary" id="create-btn" hidden>New Repository</button>
     <hr>
     <div id="create-div" hidden>
         {% include 'forms/create-repo.html' %}
     </div>
+    <noscript>
+        <h1>New Repository</h1>
+        {% include 'forms/create-repo.html' %}
+    </noscript>
 </div>
 {% endblock %}
 

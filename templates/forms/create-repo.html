@@ -1,0 +1,13 @@
+<form action="/repo/create" method="POST">
+    {{ form.hidden_tag() }}
+    {{form.title.label}}
+    {{form.title()}}
+    {{form.description.label}}
+    {{form.description()}}
+    <br>
+    {{form.pass_phrase.label}}
+    {{form.pass_phrase()}}
+    {{form.is_private.label}}
+    {{form.is_private()}}
+    <button>Submit</button>
+</form>

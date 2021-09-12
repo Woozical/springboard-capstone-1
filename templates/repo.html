@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Untitled Repo
+{% endblock %}
+
+{% block content %}
+<!-- To Do: WTForms for forms? -->
+<div id="flashes">
+</div>
+<div id="controls">
+    {% if session['working_repo'] == repo.access_key %}
+    <form id="new-link-form" action="">
+        <input type="text" id="input-url" name="new">
+    </form>
+    <button id="btn-new-divide">Add Divider</button>
+    <button id="btn-new-tbox">Add TextBox</button>
+    <button id="btn-save-changes">Save Changes</button>
+    <button id="btn-edit-repo">Edit Repo Info</button>
+    <button id="btn-delete-repo">Delete Repo</button>
+    {% else %}
+    <button id="btn-auth-repo">Edit</button>
+    {% endif %}
+</div>
+{% if session['working_repo'] == repo.access_key %}
+<!-- To Do: Make forms modals -->
+<div id="repo-delete-div" hidden>
+    <button id="btn-close-repo-delete">X</button>
+    <form id="repo-delete-form">
+        Are you sure you want to delete this repository?
+        This action is not reversable.
+        <p id='repo-delete-response'></p>
+        <label for="repo-delete-pw">Enter pass phrase to confirm:</label>
+        <input type="password" id="repo-delete-pw" name="pass_phrase">
+        <button>Confirm</button>
+    </form>
+</div>
+<div id="repo-edit-div" hidden>
+    <form id="repo-edit-form">
+        <label for="repo-title-input">Title</label>
+        <input type="text" id="repo-title-input" name="repoTitle">
+        <label for="repo-desc-input">Description</label>
+        <input type="text" id="repo-desc-input" name="repoDesc">
+        <label for="repo-privacy-input">Private Repo</label>
+        
+        <input type="checkbox"
+        id="repo-privacy-input"
+        name="repoPrivacy"
+        {% if repo.is_private %}
+        checked
+        {% endif %}
+        >
+        <button>Save</button>
+    </form>
+</div>
+{% endif %}
+<div id="content">
+    <h1 id="repo-title"></h1>
+    <p id="repo-desc"></p>
+    <div id="repo-entries">
+        <ul id='repo-entry-list'></ul>
+    </div>
+</div>
+{% if session['working_repo'] == repo.access_key %}
+<div id="entry-edit-div" hidden>
+    <form id="entry-edit-form">
+        <label for="entry-title-input">Title</label>
+        <input type="text" id="entry-title-input" name="entryTitle">
+        <label for="entry-desc-input">Description</label>
+        <input type="text" id="entry-desc-input" name="entryDesc">
+        <label for="entry-image-input">Image Preview</label>
+        <input type="text" id="entry-image-input" name="entryImage">
+        <label for="entry-url">URL</label>
+        <input type="text" id="entry-url-input" name="entryURL">
+        <label for="entry-type-input">Type</label>
+        <select id="entry-type-input" name="entryType">
+            <option value="link">Link</option>
+            <option value="divider">Divider</option>
+            <option value="text_box">Text Box</option>
+        </select>
+        <button>Done</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+<script src="/static/app.js"></script>
+{% if session.get('working_repo') == repo.access_key %}
+    <script>
+        let viewState = 1;
+        loadRepoData('{{repo.access_key}}');
+    </script>
+{% else %}
+    <script>
+        let viewState = 0;
+        loadRepoData('{{repo.access_key}}');
+    </script>
+{% endif %}
+{% endblock %}

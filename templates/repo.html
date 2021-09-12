@@ -13,13 +13,15 @@ Untitled Repo
 <div id="controls">
     {% if session['working_repo'] == repo.access_key %}
     <form id="new-link-form" action="">
-        <input type="text" id="input-url" name="new">
+        <input type="text" id="input-url" name="new" placeholder="Paste link here">
+        <button class="btn btn-primary btn-sm">Enter</button>
     </form>
-    <button id="btn-new-divide">Add Divider</button>
-    <button id="btn-new-tbox">Add TextBox</button>
-    <button id="btn-save-changes">Save Changes</button>
-    <button id="btn-edit-repo">Edit Repo Info</button>
-    <button id="btn-delete-repo">Delete Repo</button>
+    <button class="btn btn-outline-primary" id="btn-new-divide">Add Divider</button>
+    <button class="btn btn-outline-primary" id="btn-new-tbox">Add TextBox</button>
+    <button class="btn btn-success" id="btn-save-changes">Save Changes</button>
+    <button class="btn" id="btn-edit-repo"><i class="bi bi-gear"></i>
+        Edit Repo Info</button>
+    <button class="btn btn-danger" id="btn-delete-repo">Delete Repo</button>
     {% else %}
     <button id="btn-auth-repo">Edit</button>
     {% endif %}
@@ -89,14 +91,14 @@ Untitled Repo
 
 {% block script %}
 <script src="/static/app.js"></script>
-{% if session.get('working_repo') == repo.access_key %}
+{% if session.get('working_repo') == repo.access_key %} 
     <script>
-        let viewState = 1;
+        const viewState = 1;
         loadRepoData('{{repo.access_key}}');
     </script>
 {% else %}
     <script>
-        let viewState = 0;
+        const viewState = 0;
         loadRepoData('{{repo.access_key}}');
     </script>
 {% endif %}

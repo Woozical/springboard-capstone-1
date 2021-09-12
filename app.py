@@ -172,6 +172,7 @@ def api_repo_delete(access_key):
     
     db.session.delete(repo)
     db.session.commit()
+    del session['working_repo']
     return jsonify(message=f"success. {access_key} deleted."), 200
 
 @app.route('/api/repo/<access_key>', methods=['PATCH'])

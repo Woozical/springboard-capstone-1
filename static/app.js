@@ -44,6 +44,10 @@ class Entry {
     }
 
     generateMarkup(index){
+        const editIcons = (index) => {
+            return `<i class="bi bi-x-circle text-danger" id="delete_${index}"></i>
+            <i class="bi bi-gear" id="edit_${index}"></i>`
+        }
         // TO DO: markup styling
         // TO DO: no anchor tag if this.url is null
         const img = this.image ? this.image : NOIMG;
@@ -52,9 +56,7 @@ class Entry {
             case 'link':
                 markup = '<div>';
                 if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
+                    markup = markup + editIcons(index);
                 }
                 markup = markup + `
                 <img src="${img}" onerror="imgError(this);" width=50 height=50>
@@ -65,8 +67,8 @@ class Entry {
                 markup = '<div>';
                 if (viewState === AUTH.edit){
                     markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
+                    <button id="delete_${index}"><i class="bi bi-x-circle"></i></button>
+                    <button id="edit_${index}"><i class="bi bi-gear"></i></button>`;
                 }
                 markup = markup + `
                 <hr>
@@ -76,8 +78,8 @@ class Entry {
                 markup = '<div>';
                 if (viewState === AUTH.edit){
                     markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
+                    <button id="delete_${index}"><i class="bi bi-x-circle"></i></button>
+                    <button id="edit_${index}"><i class="bi bi-gear"></i></button>`;
                 }
                 markup = markup + `
                     <p><b>${this.title}</b> <br>
@@ -409,6 +411,7 @@ function entriesEventHandler(evt, repo){
             break;
         case 'delete':
             repo.deleteEntry(entryIndex);
+            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
             break;
     }
 }

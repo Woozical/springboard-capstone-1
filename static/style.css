@@ -1,3 +1,9 @@
 ul{
     list-style: none;
 }
+
+.link-thumbnail{
+    object-fit: contain;
+    max-width: 100px;
+    max-height: 100px;
+}

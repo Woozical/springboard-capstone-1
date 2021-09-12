@@ -5,13 +5,41 @@ const AUTH = {view : 0, edit : 1} // For rendering purposes
 // TO DO: Entry sorting, re-ordering, rating
 // TO DO: Delete repo
 
+class Component {
+    static linkCard(index, entry){
+        let edit = ''
+        if (viewState === AUTH.edit){
+            edit = `
+            <div class="text-align-right">
+                <i class="bi bi-gear" id="edit_${index}"></i>
+                <i class="bi bi-x-circle text-danger" id="delete_${index}"></i>
+            </div>`
+        }
+        return `<div class="card w-100">
+            <div class="card-body">
+            <div class="row">
+                <div class="col-10">
+                    <h5 class="card-title"><a href="${entry.url}">${entry.title}</a></h5>
+                    <p class="card-text">${entry.description}</p>
+                    <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
+                </div>
+                <div class="col-2">
+                    <img src="${entry.image}" class="card-img rounded float-right">
+                    ${edit}
+                </div>
+            </div>
+            </div>
+        </div>`
+    }
+}
+
 class Entry {
     // TO DO: Make url a URL object, and make use of those properties
     static idGen = Entry.generateID();
     constructor({id, title, description, image, url, type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
         this.title = title;
-        this.description = description;
+        this.description = description ? description : '';
         this.image= image;
         this.url = url;
         this.type = type;
@@ -88,7 +116,8 @@ class Entry {
                 </div>`;
                 break;  
         }
-        return markup;
+        // return markup;
+        return Component.linkCard(index, this);
     }
     
 }

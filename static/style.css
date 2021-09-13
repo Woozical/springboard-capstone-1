@@ -16,6 +16,10 @@ ul{
     background-color: rgba(0,0,0, 0.4);
 }
 
+.bi:hover{
+    color: skyblue;
+}
+
 .modal-form {
     background-color: #fefefe;
     margin: 13% auto;

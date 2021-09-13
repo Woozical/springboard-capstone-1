@@ -360,7 +360,7 @@ async function loadRepoData(accessKey){
             modalCloseHandlers();
         } else {
             // Always set up the control div handler, so user can click edit button to bring up auth
-            document.getElementById('controls').addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
+            document.getElementById('controls').addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
         }
     }
 }
@@ -372,9 +372,11 @@ function initEditEventListeners(repo){
     const newLinkForm = document.getElementById('new-link-form');
     const repoEditForm = document.getElementById('repo-edit-form');
     const repoDeleteForm = document.getElementById('repo-delete-form');
+    const entryDeleteBtn = document.getElementById('btn-entry-delete');
 
-    controls.addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
-    entryList.addEventListener('click', (evt) => {entriesEventHandler(evt, repo)});
+    controls.addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
+    entryList.addEventListener('click', (evt) => {entriesClickHandler(evt, repo)});
+    entryDeleteBtn.addEventListener('click', (evt) => {entryDeleteHandler(evt, repo)});
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
     repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
     
@@ -401,6 +403,7 @@ function initEditEventListeners(repo){
 function modalCloseHandlers(){
     const repoModal = document.getElementById('repo-edit-div');
     const deleteModal = document.getElementById('repo-delete-div');
+    const entryModal = document.getElementById('entry-edit-div');
 
     repoModal.addEventListener('click', function(evt){
         switch(evt.target.id){
@@ -422,7 +425,18 @@ function modalCloseHandlers(){
                 deleteModal.style.display = 'none';
                 break;
         }
-    })
+    });
+
+    entryModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-entry-modal':
+                entryModal.style.display = 'none';
+                break;
+            case 'entry-edit-div':
+                entryModal.style.display = 'none';
+                break;
+        }
+    });
 
 }
 
@@ -430,8 +444,9 @@ function unSavedChangesHandler(evt){
     evt.preventDefault();
     return evt.returnValue = 'Are you sure you want to exit? This repo has unsaved changes.';
 }
+
 // Event handler for the control panel
-function controlEventHandler(evt, repo){
+function controlClickHandler(evt, repo){
     switch (evt.target.id){
         case 'btn-new-divide':
             repo.addDivider();
@@ -475,19 +490,21 @@ async function deleteConfirmationHandler(evt, repo){
         }
     );
 }
-
-function entriesEventHandler(evt, repo){
+// To Do: account for removal of delete button on main view
+function entriesClickHandler(evt, repo){
     const [method, entryIndex] = evt.target.id.split('_');
     switch (method){
         case 'edit':
             // Toggle visibility of Entry Editing Form
-            document.getElementById('entry-edit-div').hidden = false;
+            document.getElementById('entry-edit-div').style.display = 'block';
             loadEntryIntoEditForm(repo, entryIndex);
             break;
         case 'delete':
             repo.deleteEntry(entryIndex);
             window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
             break;
+        
+        // Sequence shifting will go here.
     }
 }
 
@@ -509,9 +526,17 @@ function entryEditSubmitHandler(evt, repo){
     entryEditForm.entryURL.value = '';
     entryEditForm.entryType.value = '';
     entryEditForm.entryImage.value = '';
-    document.getElementById('entry-edit-div').hidden = true;
+    document.getElementById('entry-edit-div').style.display = 'none';
     window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
     repo.refreshEntryMarkup(entryIndex);
+}
+
+function entryDeleteHandler(evt, repo){
+    const form = document.getElementById('entry-edit-form');
+    const entryIndex = form.getAttribute('data-entryIndex');
+    repo.deleteEntry(entryIndex);
+    window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+    document.getElementById('entry-edit-div').style.display = 'none';
 }
 
 function loadRepoIntoEditForm(repo){

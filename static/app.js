@@ -70,7 +70,7 @@ class Component {
             `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
             '';
         const image = entry.image ?
-            `<img class="tBox-image" src=${entry.image} align="right" />` : 
+            `<img onerror="imgError(this);" class="tBox-image" src=${entry.image} align="right" />` : 
             '';
         return `
         <div class="row">
@@ -257,7 +257,6 @@ class Repo {
 
         axios.patch(`/api/repo/${this.accessKey}`, data);
         this.displayRepoInfo();
-        document.getElementById('repo-edit-div').hidden = true;
     }
 
     async commitEntryChanges(){
@@ -358,6 +357,7 @@ async function loadRepoData(accessKey){
         // Only bother with setting up editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
+            modalCloseHandlers();
         } else {
             // Always set up the control div handler, so user can click edit button to bring up auth
             document.getElementById('controls').addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
@@ -397,7 +397,27 @@ function initEditEventListeners(repo){
         } catch {
             flash('Something went wrong. Please try again later.');
         }
+        document.getElementById('repo-edit-div').style.display = 'none';
     });
+}
+
+function modalCloseHandlers(){
+    const repoModal = document.getElementById('repo-edit-div');
+
+    repoModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-repo-modal':
+                repoModal.style.display = 'none';
+                break;
+            case 'repo-edit-div':
+                repoModal.style.display = 'none';
+                break;
+            case 'close-repo-btn':
+                repoModal.style.display = 'none';
+                break;
+        }
+    });
+    
 }
 
 function unSavedChangesHandler(evt){
@@ -424,15 +444,14 @@ function controlEventHandler(evt, repo){
             }
             break;
         case 'btn-edit-repo':
-            const div = document.getElementById('repo-edit-div')
-            div.hidden = !div.hidden;
-            if (div.hidden == false ) loadRepoIntoEditForm(repo);
+            document.getElementById('repo-edit-div').style.display = 'block';
+            loadRepoIntoEditForm(repo);
             break;
         case 'btn-auth-repo':
             window.location =`/repo/auth?access_key=${repo.accessKey}`; 
             break;
         case "btn-delete-repo":
-            document.getElementById('repo-delete-div').hidden = false;
+            document.getElementById('repo-delete-div').style.display = 'block';
             break;
     }
 }

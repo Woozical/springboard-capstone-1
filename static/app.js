@@ -6,28 +6,86 @@ const AUTH = {view : 0, edit : 1} // For rendering purposes
 // TO DO: Delete repo
 
 class Component {
-    static linkCard(index, entry){
-        let edit = ''
-        if (viewState === AUTH.edit){
-            edit = `
-            <div class="text-align-right">
+    static editButtons(index){
+        return `
+        <div>
+            <i class="bi bi-caret-up"></i>
+            <div>
                 <i class="bi bi-gear" id="edit_${index}"></i>
-                <i class="bi bi-x-circle text-danger" id="delete_${index}"></i>
-            </div>`
-        }
-        return `<div class="card w-100">
-            <div class="card-body">
-            <div class="row">
-                <div class="col-10">
-                    <h5 class="card-title"><a href="${entry.url}">${entry.title}</a></h5>
-                    <p class="card-text">${entry.description}</p>
-                    <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
-                </div>
-                <div class="col-2">
-                    <img src="${entry.image}" class="card-img rounded float-right">
-                    ${edit}
+            </div>
+            <i class="bi bi-caret-down"></i>
+        </div>`;
+    }
+
+    static divider(index, entry){
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const text = entry.url ?
+            `<div class="ruler-words"><a class="ruler-link"href=${entry.url}>${entry.title}</a></div>` :
+            `<div class="ruler-words">${entry.title}</div>`;
+        return `
+        <div class="row">
+            <div class="col-auto">
+                ${edit}
+            </div>
+            <div class="col-11">
+                <div class="ruler">
+                    <div class="ruler-line"><div></div></div>
+                    ${text}
+                    <div class="ruler-line"><div></div></div>
                 </div>
             </div>
+        </div>`;
+    }
+
+    static linkCard(index, entry){
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        return `
+        <div class="row">
+        <div class="col-auto">
+            ${edit}
+        </div>
+        <div class="col-11">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-10">
+                            <h6 class="card-title"><a href="${entry.url}">${entry.title}</a></h6>
+                            <p class="card-text">${entry.description}</p>
+                            <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
+                        </div>
+                        <div class="col-2">
+                            <img onerror="imgError(this);" src="${entry.image}" class="card-img rounded float-right">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>`;
+    }
+
+    static textBox(index, entry){
+        console.log(entry);
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const link = entry.url ?
+            `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
+            '';
+        const image = entry.image ?
+            `<img class="tBox-image" src=${entry.image} align="right" />` : 
+            '';
+        return `
+        <div class="row">
+            <div class="col-auto">
+                ${edit}
+            </div>
+            <div class="col-11">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">${entry.title}</h5>
+                        ${image}
+                        <p class="card-text">${entry.description}</p>
+                    </div>
+                    ${link}
+                </div>
             </div>
         </div>`
     }
@@ -72,52 +130,15 @@ class Entry {
     }
 
     generateMarkup(index){
-        const editIcons = (index) => {
-            return `<i class="bi bi-x-circle text-danger" id="delete_${index}"></i>
-            <i class="bi bi-gear" id="edit_${index}"></i>`
-        }
-        // TO DO: markup styling
-        // TO DO: no anchor tag if this.url is null
-        const img = this.image ? this.image : NOIMG;
-        let markup = '';
         switch (this.type){
             case 'link':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + editIcons(index);
-                }
-                markup = markup + `
-                <img src="${img}" onerror="imgError(this);" width=50 height=50>
-                <a href="${this.url}">${this.title}</a>
-                </div>`;
-                break;
+                return Component.linkCard(index, this);
             case 'divider':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}"><i class="bi bi-x-circle"></i></button>
-                    <button id="edit_${index}"><i class="bi bi-gear"></i></button>`;
-                }
-                markup = markup + `
-                <hr>
-                </div>`;
-                break;
+                return Component.divider(index, this);
             case 'text_box':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}"><i class="bi bi-x-circle"></i></button>
-                    <button id="edit_${index}"><i class="bi bi-gear"></i></button>`;
-                }
-                markup = markup + `
-                    <p><b>${this.title}</b> <br>
-                    ${this.description}
-                    </p>
-                </div>`;
-                break;  
+                return Component.textBox(index, this);
         }
-        // return markup;
-        return Component.linkCard(index, this);
+        throw(`Entry ${this} has invalid type ${this.type}`)
     }
     
 }
@@ -152,25 +173,25 @@ class Repo {
 
     }
     refreshEntryList(){
-        const entriesList = document.getElementById('repo-entry-list');
+        const entriesList = document.getElementById('repo-entries');
         entriesList.innerHTML = '';
 
         this.entries.forEach(
             (entry, index) => {
                 if (entry.state != 'DELETE' && entry.state != '_DELETED'){ // Don't render entries marked for deletion
-                    const li = document.createElement('li');
-                    li.id = `entry_${index}`;
-                    li.innerHTML = entry.generateMarkup(index);
-                    entriesList.append(li);
+                    const div = document.createElement('div');
+                    div.id = `entry_${index}`;
+                    div.innerHTML = entry.generateMarkup(index);
+                    entriesList.append(div);
                 }
             }
         );
     }
 
     refreshEntryMarkup(entryIndex){
-        const entryLI = document.getElementById(`entry_${entryIndex}`);
+        const entryDiv = document.getElementById(`entry_${entryIndex}`);
         const entry = this.entries[entryIndex];
-        entryLI.innerHTML = entry.generateMarkup(entryIndex);
+        entryDiv.innerHTML = entry.generateMarkup(entryIndex);
     }
 
     addDivider(){
@@ -455,7 +476,7 @@ function entryEditSubmitHandler(evt, repo){
     entry.description = entryEditForm.entryDesc.value;
     entry.url = entryEditForm.entryURL.value;
     entry.type = entryEditForm.entryType.value;
-    entry.image = entryEditForm.entryImage.value ? entryEditForm.entryImage.value : NOIMG;
+    entry.image = entryEditForm.entryImage.value;
     entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE'
     // Clear and hide form, update DOM
     entryEditForm.entryTitle.value = '';

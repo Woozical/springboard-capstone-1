@@ -2,8 +2,37 @@ ul{
     list-style: none;
 }
 
-.link-thumbnail{
+.tBox-image{
     object-fit: contain;
-    max-width: 100px;
-    max-height: 100px;
+    max-width: 33%;
+}
+
+.ruler {
+    display: table;
+}
+
+.ruler>div {
+    display: table-cell;
+    white-space:nowrap;
+}
+
+.ruler-line>div {
+    border-bottom: 1px solid silver;
+    height: 1px;
+}
+
+.ruler-words {
+    padding: 0 5px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.ruler-line {
+    width: 50%;
+    vertical-align: middle;
+}
+
+.ruler-link{
+    text-decoration: none;
 }

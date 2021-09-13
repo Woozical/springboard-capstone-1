@@ -32,7 +32,7 @@ Untitled Repo
         <button class="btn btn-outline-info" id="btn-edit-repo">
             <i class="bi bi-gear"></i>Edit Repo Info
         </button>
-        <button class="btn btn-danger" id="btn-delete-repo">Delete Repo</button>
+        <button class="btn btn-outline-danger" id="btn-delete-repo">Delete Repo</button>
         {% else %}
         <button id="btn-auth-repo">Edit</button>
         {% endif %}
@@ -43,14 +43,25 @@ Untitled Repo
 <!-- To Do: Make forms modals -->
 <!-- Move <form>s into templates/forms and include -->
 <div class="modal" role="dialog" id="repo-delete-div">
-    <button id="btn-close-repo-delete">X</button>
     <form class="modal-form" id="repo-delete-form">
-        Are you sure you want to delete this repository?
-        This action is not reversable.
-        <p id='repo-delete-response'></p>
-        <label for="repo-delete-pw">Enter pass phrase to confirm:</label>
-        <input type="password" id="repo-delete-pw" name="pass_phrase">
-        <button>Confirm</button>
+            <div class="alert text-center alert-warning">
+                Are you sure you want to delete this repository?
+                This action is not reversable.
+            </div>
+            <div class="form-group row justify-content-center text-center">
+                <label class="form-label" for="repo-delete-pw">Enter password to confirm:</label>
+                <input class="form-control w-50" type="password" id="repo-delete-pw" name="pass_phrase">
+                <small class="text-danger" id="repo-delete-response"></small>
+            </div>
+            <br>
+            <div class="row justify-content-center">
+                <div class="col-2">
+                    <button class="btn btn-outline-secondary btn-lg" type="button" id="btn-close-repo-delete">Cancel</button>
+                </div>
+                <div class="col-2">
+                    <button class="btn btn-danger btn-lg" type="submit">Confirm</button>
+                </div>
+            </div>
     </form>
 </div>
 <div class="modal" role="form" id="repo-edit-div">
@@ -87,7 +98,6 @@ Untitled Repo
             </div>
         </div>
         <br>
-        <button type="button" id="close-repo-btn" class="btn btn-outline-secondary btn-lg">Cancel</button>
         <button type="submit" class="btn btn-success btn-lg">Save</button> 
         </div>
     </form>

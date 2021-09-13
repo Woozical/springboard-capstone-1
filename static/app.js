@@ -378,9 +378,6 @@ function initEditEventListeners(repo){
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
     repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
     
-    document.getElementById('btn-close-repo-delete').addEventListener('click', () => {
-        document.getElementById('repo-delete-div').hidden = true});
-    
     newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
         const link = newLinkForm.new.value;
@@ -403,6 +400,7 @@ function initEditEventListeners(repo){
 
 function modalCloseHandlers(){
     const repoModal = document.getElementById('repo-edit-div');
+    const deleteModal = document.getElementById('repo-delete-div');
 
     repoModal.addEventListener('click', function(evt){
         switch(evt.target.id){
@@ -412,12 +410,20 @@ function modalCloseHandlers(){
             case 'repo-edit-div':
                 repoModal.style.display = 'none';
                 break;
-            case 'close-repo-btn':
-                repoModal.style.display = 'none';
-                break;
         }
     });
-    
+
+    deleteModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'btn-close-repo-delete':
+                deleteModal.style.display = 'none';
+                break;
+            case 'repo-delete-div':
+                deleteModal.style.display = 'none';
+                break;
+        }
+    })
+
 }
 
 function unSavedChangesHandler(evt){
@@ -464,7 +470,7 @@ async function deleteConfirmationHandler(evt, repo){
         if (response.status === 200) window.location = '/';
     })
     .catch( function(){
-        document.getElementById('repo-delete-response').innerText = 'Incorrect pass phrase';
+        document.getElementById('repo-delete-response').innerText = 'Incorrect password';
         evt.target.pass_phrase.value = '';
         }
     );

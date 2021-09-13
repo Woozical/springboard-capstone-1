@@ -1,0 +1,47 @@
+<form class="modal-form" id="entry-edit-form">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h5>Edit Entry</h5>
+            </div>
+            <div class="col">
+                <span class="close"><i id="close-entry-modal" class="bi bi-x-lg"></i></span>
+            </div>
+        </div>
+        <hr>
+        <div class="form-group row">
+            <label class="col-sm-1 col-form-label" for="entry-title-input">Title</label>
+            <div class="col-sm-5">
+                <input class="form-control" type="text" id="entry-title-input" name="entryTitle">
+            </div>
+            <label class="col-sm-1 col-form-label" for="entry-url-input">URL</label>
+            <div class="col-sm-5">
+                <input class="form-control" type="url" id="entry-url-input" name="entryURL">
+            </div>
+        </div>
+        <br>
+        <div class="form-group row">
+            <label class="col-sm-1 col-form-label" for="entry-image-input">Image</label>
+            <div class="col-sm-8">
+                <input class="form-control" type="url" id="entry-image-input" name="entryImage">
+            </div>
+            <label class="col-sm-1 col-form-label" for="entry-type-input">Type</label>
+            <div class="col-sm-auto">
+                <select class="form-control" id="entry-type-input" name="entryType">
+                    <option value="link">Link</option>
+                    <option value="divider">Divider</option>
+                    <option value="text_box">Text Box</option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <div class="form-group form-row">
+            <label class="form-label" for="entry-desc-input">Description</label>
+                <textarea class="form-control" rows="3" type="text" id="entry-desc-input" name="entryDesc"></textarea>
+
+        </div>
+        <br>
+        <button type="button" id="btn-entry-delete" class="btn btn-lg btn-outline-danger">Remove</button>
+        <button type="submit" class="btn btn-lg btn-success">Done</button>
+    </div>
+</form>

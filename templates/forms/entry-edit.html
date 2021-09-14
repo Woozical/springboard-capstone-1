@@ -35,10 +35,15 @@
             </div>
         </div>
         <br>
-        <div class="form-group form-row">
-            <label class="form-label" for="entry-desc-input">Description</label>
+        <div class="form-group row">
+            <div class="col-10">
+                <label class="form-label" for="entry-desc-input">Description</label>
                 <textarea class="form-control" rows="3" type="text" id="entry-desc-input" name="entryDesc"></textarea>
-
+            </div>
+            <div class="col-2">
+                <label class="form-label" for="entry-rating-input">Rating</label>
+                <input class="form-control" max="5" min="0" type="number" name="entryRating" id="entry-rating-input">
+            </div>
         </div>
         <br>
         <button type="button" id="btn-entry-delete" class="btn btn-lg btn-outline-danger">Remove</button>

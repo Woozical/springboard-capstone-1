@@ -6,6 +6,11 @@ const AUTH = {view : 0, edit : 1} // For rendering purposes
 // TO DO: Delete repo
 
 class Component {
+
+    static stars(count){
+        return '<i class="text-warning bi bi-star-fill"></i>'.repeat(count);
+    }
+
     static editButtons(index){
         return `
         <div>
@@ -20,8 +25,8 @@ class Component {
     static divider(index, entry){
         const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
         const text = entry.url ?
-            `<div class="ruler-words"><a class="ruler-link"href=${entry.url}>${entry.title}</a></div>` :
-            `<div class="ruler-words">${entry.title}</div>`;
+            `<div class="ruler-words"><a class="ruler-link"href=${entry.url}>${entry.title}</a> ${Component.stars(entry.rating)}</div>` :
+            `<div class="ruler-words">${entry.title}  ${Component.stars(entry.rating)}</div>`;
         return `
         <div class="row">
             <div class="col-auto">
@@ -49,7 +54,7 @@ class Component {
                 <div class="card-body">
                     <div class="row">
                         <div class="col-10">
-                            <h6 class="card-title"><a href="${entry.url}">${entry.title}</a></h6>
+                            <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
                             <p class="card-text">${entry.description}</p>
                             <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
                         </div>
@@ -79,7 +84,7 @@ class Component {
             <div class="col-11">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title text-center">${entry.title}</h5>
+                        <h5 class="card-title text-center">${entry.title}  ${Component.stars(entry.rating)}</h5>
                         ${image}
                         <p class="card-text">${entry.description}</p>
                     </div>
@@ -552,6 +557,7 @@ function entryEditSubmitHandler(evt, repo){
     entry.url = entryEditForm.entryURL.value;
     entry.type = entryEditForm.entryType.value;
     entry.image = entryEditForm.entryImage.value;
+    entry.rating = entryEditForm.entryRating.value;
     entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE'
     // Clear and hide form, update DOM
     entryEditForm.entryTitle.value = '';
@@ -559,6 +565,7 @@ function entryEditSubmitHandler(evt, repo){
     entryEditForm.entryURL.value = '';
     entryEditForm.entryType.value = '';
     entryEditForm.entryImage.value = '';
+    entryEditForm.entryRating.value = 0;
     document.getElementById('entry-edit-div').style.display = 'none';
     window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
     repo.refreshEntryMarkup(entryIndex);
@@ -588,6 +595,7 @@ function loadEntryIntoEditForm(repo, entryIndex){
     form.entryURL.value = entry.url;
     form.entryType.value = entry.type;
     form.entryImage.value = entry.image === NOIMG ? '' : entry.image;
+    form.entryRating.value = entry.rating;
     form.setAttribute('data-entryIndex', entryIndex);
 }
 

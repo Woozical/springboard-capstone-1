@@ -8,39 +8,36 @@ Untitled Repo
 <!-- To Do: WTForms for forms? -->
 <!-- To Do: Noscript version -->
 <div class="container">
-<div class="row">
-    <div id="flashes">
-    </div>
-</div>
-<div class="row">
-    <div class="col-8" id="content">
-        <h1 id="repo-title">{{repo.title}}</h1>
-        <p id="repo-desc">{{repo.description}}</p>
-        <div id="repo-entries">
-            <noscript>
-                <div class="alert alert-warning">Javascript is required to use this website.</div>
-            </noscript>
+    <div class="row">
+        <div class="col-8" id="content">
+            <h1 id="repo-title">{{repo.title}}</h1>
+            <p id="repo-desc">{{repo.description}}</p>
+            <div id="repo-entries">
+                <noscript>
+                    <div class="alert alert-warning">Javascript is required to use this website.</div>
+                </noscript>
+            </div>
+        </div>
+        <div class="col-4" id="controls">
+            {% if session['working_repo'] == repo.access_key %}
+            <button class="btn btn-success" id="btn-save-changes">Save Changes</button>
+            <form id="new-link-form" action="">
+                <input type="text" id="input-url" name="new" placeholder="Paste link here">
+                <button class="btn btn-primary btn-sm">Enter</button>
+            </form>
+            <button class="btn btn-outline-primary" id="btn-new-divide">Add Divider</button>
+            <button class="btn btn-outline-primary" id="btn-new-tbox">Add TextBox</button>
+            <hr>
+            <button class="btn btn-outline-info" id="btn-edit-repo">
+                <i class="bi bi-gear"></i>Edit Repo Info
+            </button>
+            <button class="btn btn-outline-danger" id="btn-delete-repo">Delete Repo</button>
+            {% else %}
+            <button id="btn-auth-repo">Edit</button>
+            {% endif %}
+            <div class="text-center" id="flashes"></div>
         </div>
     </div>
-    <div class="col-4" id="controls">
-        {% if session['working_repo'] == repo.access_key %}
-        <button class="btn btn-success" id="btn-save-changes">Save Changes</button>
-        <form id="new-link-form" action="">
-            <input type="text" id="input-url" name="new" placeholder="Paste link here">
-            <button class="btn btn-primary btn-sm">Enter</button>
-        </form>
-        <button class="btn btn-outline-primary" id="btn-new-divide">Add Divider</button>
-        <button class="btn btn-outline-primary" id="btn-new-tbox">Add TextBox</button>
-        <hr>
-        <button class="btn btn-outline-info" id="btn-edit-repo">
-            <i class="bi bi-gear"></i>Edit Repo Info
-        </button>
-        <button class="btn btn-outline-danger" id="btn-delete-repo">Delete Repo</button>
-        {% else %}
-        <button id="btn-auth-repo">Edit</button>
-        {% endif %}
-    </div>
-</div>
 
 {% if session['working_repo'] == repo.access_key %}
 <!-- To Do: Make forms modals -->

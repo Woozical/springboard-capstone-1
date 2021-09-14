@@ -244,7 +244,7 @@ class Repo {
         this.refreshEntryList();
     }
 
-    commitRepoChanges(){
+    async commitRepoChanges(){
         const form = document.getElementById('repo-edit-form');
         this.title = form.repoTitle.value;
         this.description = form.repoDesc.value;
@@ -254,9 +254,18 @@ class Repo {
             description: this.description,
             is_private : this.isPrivate
         }
-
-        axios.patch(`/api/repo/${this.accessKey}`, data);
-        this.displayRepoInfo();
+        const repo = this;
+        await axios.patch(`/api/repo/${this.accessKey}`, data)
+        .then( function(response){
+            if (response.status === 200){
+                flash('Changes saved.', 'success');
+                repo.displayRepoInfo();
+            }
+        })
+        .catch( function(error){
+            flash('Something went wrong. Please try again later.', 'danger');
+            console.error(error);
+        });
     }
 
     async commitEntryChanges(){
@@ -310,10 +319,10 @@ class Repo {
             }
             
             if (changes){
-                flash('Changes saved.');
+                flash('Changes saved.', 'success');
             }
             else{
-                flash('Repo up to date.');
+                flash('Repo up to date.', 'info');
             }
 
         } catch (err) {
@@ -322,10 +331,10 @@ class Repo {
     }
 }
 let flashTimer
-function flash(message){
+function flash(message, category){
     clearInterval(flashTimer);
     const flashDiv = document.getElementById('flashes');
-    flashDiv.innerHTML = `<p>${message}</p>`;
+    flashDiv.innerHTML = `<div class="alert alert-${category}">${message}</div>`;
     flashTimer = setTimeout(()=>{
         flashDiv.innerHTML = '';
     }, 2000);
@@ -380,7 +389,7 @@ function initEditEventListeners(repo){
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
     repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
     
-    newLinkForm.addEventListener('submit', (evt) => {
+    newLinkForm.addEventListener('submit', (evt, repo) => {
         evt.preventDefault();
         const link = newLinkForm.new.value;
         repo.addLink(link);
@@ -390,12 +399,7 @@ function initEditEventListeners(repo){
 
     repoEditForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        try{
-            repo.commitRepoChanges();
-            flash('Changes saved.');
-        } catch {
-            flash('Something went wrong. Please try again later.');
-        }
+        repo.commitRepoChanges();
         document.getElementById('repo-edit-div').style.display = 'none';
     });
 }
@@ -461,7 +465,7 @@ function controlClickHandler(evt, repo){
                 repo.commitEntryChanges();
                 window.removeEventListener("beforeunload", unSavedChangesHandler, {capture: true});
             } catch {
-                flash("Something went wrong. Please try again later.")
+                flash("Something went wrong. Please try again later.", 'danger')
             }
             break;
         case 'btn-edit-repo':

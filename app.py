@@ -21,7 +21,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 connect_db(app)
 db.create_all()
 
-@app.before_request()
+@app.before_request
 def before_request_func():
     if 'SameSite' not in session:
         session['SameSite'] = 'Strict'
@@ -219,9 +219,9 @@ def api_repo_patch(access_key):
     if 'title' in data:
         if not isinstance(data['title'], str):
             errors['title'] = 'Must be of type string. '
-        elif len(data['title']) > 100:
+        elif len(data['title']) > 50:
             err = errors.get('title', '')
-            err = err + 'Must be 100 characters or less'
+            err = err + 'Must be 50 characters or less'
             errors['title'] = err
         else:
             repo.title = data['title']
@@ -229,7 +229,7 @@ def api_repo_patch(access_key):
     if 'description' in data:
         if not isinstance(data['description'], str):
             errors['description'] = 'Must be of type string. '
-        elif len(data['description']) > 100:
+        elif len(data['description']) > 300:
             err = errors.get('description', '')
             err = err + 'Must be 300 characters or less'
             errors['description'] = err

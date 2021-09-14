@@ -21,15 +21,29 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 connect_db(app)
 db.create_all()
 
+@app.before_request()
+def before_request_func():
+    if 'SameSite' not in session:
+        session['SameSite'] = 'Strict'
+
 ## Front-end Layer
-
-
 @app.route('/')
 def home_view():
     form = NewRepoForm()
-    session['SameSite'] = 'Strict'
+    sAuth = 'working_repo' in session
+    sView = 'last_viewed' in session
 
-    return render_template('home.html', form=form)
+    if sAuth and sView:
+        if session['working_repo'] == session['last_viewed']:
+            last_edited = last_viewed = Repo.query.get(session['last_viewed'])
+        else:
+            last_edited = Repo.query.get(session['working_repo'])
+            last_viewed = Repo.query.get(session['last_viewed'])
+    else:
+        last_edited = Repo.query.get(session['working_repo']) if sAuth else None
+        last_viewed = Repo.query.get(session['last_viewed']) if sView else None
+
+    return render_template('home.html', form=form, last_edited=last_edited, last_viewed=last_viewed)
 
 @app.route('/repo/<access_key>')
 def repo_view(access_key):
@@ -38,6 +52,7 @@ def repo_view(access_key):
         return redirect(url_for('repo_auth', access_key=access_key))
     else:
         repo.update_last_visited()
+        session['last_viewed'] = repo.access_key
         return render_template('repo.html', repo=repo)
 
 @app.route('/repo/auth', methods=['GET', 'POST'])
@@ -86,6 +101,7 @@ def repo_create():
     else:
         return redirect(url_for('home_view'))
 
+# To Do: 404 page
 
 ### API Layer ###
 

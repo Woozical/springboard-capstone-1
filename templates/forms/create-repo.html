@@ -8,10 +8,10 @@
         </div>
         <div class="col">
             {{form.pass_phrase.label}}
-            <small class="text-secondary">(*) <i>Users must enter the password to edit the repository.</i></small>
             {{form.pass_phrase(class="form-control form-control-lg", placeholder="Required")}}
             <input type="checkbox" name="show_pw" id="show-pw-input">
             <label for="show-pw-input">Show</label>
+            <small class="form-text"><i>Users must enter the password to edit the repository.</i></small>
             <small class="text-danger" id="pass_phrase-errors"> </small>
         </div>
     </div>
@@ -27,7 +27,7 @@
         <div class="col">
             {{form.is_private.label(class="form-check-label")}}
             {{form.is_private(class="form-check-input")}}
-            <small class="text-secondary">
+            <small class="form-text">
                 The password must be entered to view the repository. <br>
                 Note: This still gives editing access.
             </small>

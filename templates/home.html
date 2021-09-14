@@ -5,19 +5,57 @@ LinkBin
 {% endblock %}
 
 {% block content %}
+<div class="landing-gradient"></div>
 <div class="container">
-    <h1>Welcome!</h1>
-    <p>This is the landing page</p>
-    <button class="btn btn-lg btn-primary" id="create-btn" hidden>New Repository</button>
-    <hr>
-    <div id="create-div" hidden>
+    <div class="text-center">
+        <h1 class="display-1 text-white">LinkBin</h1>
+        <p class="text-white">Save and share your links with style.</p>
+        <br>
+        <div class="row">
+            <div class="col text-white">
+                {% if last_edited %}
+                    Last Edited: <a class="text-white" href="/repo/{{last_edited.access_key}}">
+                    {% if last_edited.title %}
+                        {{last_edited.title}}
+                    {% else %}
+                        {{last_edited.access_key}}
+                    {% endif %}
+                    </a>
+                {% endif %}
+            </div>
+            <div class="col">
+                <button class="btn btn-lg btn-primary" id="create-btn" hidden>New Repository</button>   
+            </div>
+            <div class="col text-white">      
+                {% if last_viewed %}
+                    Last Viewed: <a class="text-white" href="/repo/{{last_viewed.access_key}}"}>
+                    {% if last_viewed.title %}
+                        {{last_viewed.title}}
+                    {% else %}
+                        {{last_viewed.access_key}}
+                    {% endif %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <hr class="text-white">
+    <div class="glass-white text-left" id="create-div" hidden>
+        <h4>Repository Details</h4>
         {% include 'forms/create-repo.html' %}
     </div>
     <noscript>
-        <h1>New Repository</h1>
+    <div class="glass-white text-left">
+        <h4>New Repository</h4>
         {% include 'forms/create-repo.html' %}
+    </div>
     </noscript>
+
 </div>
+<small class="landing-footer glass-black text-center text-white">
+    This website makes use of cookies to provide core functionality. By continuing to make use of this website,
+    you consent to the storing of cookies on your device.
+</small>
 {% endblock %}
 
 {% block script %}

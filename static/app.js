@@ -9,11 +9,11 @@ class Component {
     static editButtons(index){
         return `
         <div>
-            <i class="bi bi-caret-up"></i>
+            <i class="bi bi-caret-up" id="up_${index}"></i>
             <div>
                 <i class="bi bi-gear" id="edit_${index}"></i>
             </div>
-            <i class="bi bi-caret-down"></i>
+            <i class="bi bi-caret-down" id="down_${index}"></i>
         </div>`;
     }
 
@@ -64,7 +64,6 @@ class Component {
     }
 
     static textBox(index, entry){
-        console.log(entry);
         const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
         const link = entry.url ?
             `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
@@ -244,6 +243,19 @@ class Repo {
         this.refreshEntryList();
     }
 
+    swapEntries(eOneIdx, eTwoIdx){
+        console.log('Swapping', eOneIdx, eTwoIdx);
+        // Swaps the positions of entry one and entry two in the repo's entry array
+        [this.entries[eOneIdx], this.entries[eTwoIdx]] = [this.entries[eTwoIdx], this.entries[eOneIdx]];
+        this.entries[eOneIdx].sequence = eOneIdx;
+        this.entries[eTwoIdx].sequence = eTwoIdx;
+        this.entries[eOneIdx].state = 'CHANGE';
+        this.entries[eTwoIdx].state = 'CHANGE';
+
+        this.refreshEntryMarkup(eOneIdx);
+        this.refreshEntryMarkup(eTwoIdx);
+    }
+
     async commitRepoChanges(){
         const form = document.getElementById('repo-edit-form');
         this.title = form.repoTitle.value;
@@ -363,6 +375,7 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
+        console.log(repo);
         // Only bother with setting up editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
@@ -494,22 +507,38 @@ async function deleteConfirmationHandler(evt, repo){
         }
     );
 }
-// To Do: account for removal of delete button on main view
+
 function entriesClickHandler(evt, repo){
     const [method, entryIndex] = evt.target.id.split('_');
     switch (method){
         case 'edit':
             // Toggle visibility of Entry Editing Form
             document.getElementById('entry-edit-div').style.display = 'block';
-            loadEntryIntoEditForm(repo, entryIndex);
+            loadEntryIntoEditForm(repo, +entryIndex);
             break;
-        case 'delete':
-            repo.deleteEntry(entryIndex);
-            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+        // Sequence shifting
+        case 'up':
+            console.log('click up', entryIndex);
+            if (entryIndex > 0){
+                repo.swapEntries(+entryIndex, +entryIndex-1);
+                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            } else {
+                repo.swapEntries(+entryIndex, repo.entries.length - 1);
+                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            };
             break;
-        
-        // Sequence shifting will go here.
+        case 'down':
+            console.log('click down', entryIndex);
+            if (entryIndex < repo.entries.length -1){
+                repo.swapEntries(+entryIndex, +entryIndex+1);
+                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            } else {
+                repo.swapEntries(+entryIndex, 0);
+                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            };
+            break;
     }
+    console.log(repo);
 }
 
 function entryEditSubmitHandler(evt, repo){

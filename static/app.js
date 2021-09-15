@@ -1,8 +1,6 @@
 const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
-// TO DO: load-in spinner
-
 class Component {
 
     static stars(count){
@@ -42,8 +40,9 @@ class Component {
 
     static linkCard(index, entry){
         const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const image = entry.image ? entry.image : NOIMG;
         return `
-        <div class="row">
+        <div class="row mb-1">
         <div class="col-auto">
             ${edit}
         </div>
@@ -53,19 +52,18 @@ class Component {
                 <div class="col-10">
                 <div class="card-body">
                     <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
-                    <p class="card-text fs-7">${entry.description}
+                    <p class="card-text fs-7">${entry.description.replace(/\n/g, '<br>')}
                     </p>
-                    <small class="card-text"><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
+                    <small class="card-text fs-8"><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
                 </div>
                 </div>
                 <div class="col-2">
-                    <img height="100px;" onerror="imgError(this);" src="${entry.image}" class="card-img link-image rounded float-right">
+                    <img height="100px;" onerror="imgError(this);" src="${image}" class="card-img link-image rounded float-right">
                 </div>
             </div>
             </div>
         </div>
-        </div>
-        <br>`;
+        </div>`;
     }
 
     static textBox(index, entry){
@@ -76,8 +74,9 @@ class Component {
         const image = entry.image ?
             `<img onerror="imgError(this);" class="tBox-image rounded" src=${entry.image} align="right" />` : 
             '';
+
         return `
-        <div class="row">
+        <div class="row mb-1">
             <div class="col-auto">
                 ${edit}
             </div>
@@ -86,18 +85,16 @@ class Component {
                     <div class="card-body">
                         <h5 class="card-title text-center">${entry.title}  ${Component.stars(entry.rating)}</h5>
                         ${image}
-                        <p class="card-text">${entry.description}</p>
+                        <p class="card-text">${entry.description.replace(/\n/g, '<br>')}</p>
                     </div>
                     ${link}
                 </div>
             </div>
-        </div>
-        <br>`
+        </div>`;
     }
 }
 
 class Entry {
-    // TO DO: Make url a URL object, and make use of those properties
     static idGen = Entry.generateID();
     constructor({id, title, description, image, url, type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
@@ -155,6 +152,7 @@ class Repo {
         this.accessKey = access_key;
         this.isPrivate = is_private;
         this.entries = [];
+        this.deleted = [];
         for (let entry of entries){
             this.entries.push(
                 new Entry(entry, "ORIGINAL")
@@ -183,12 +181,10 @@ class Repo {
 
         this.entries.forEach(
             (entry, index) => {
-                if (entry.state != 'DELETE' && entry.state != '_DELETED'){ // Don't render entries marked for deletion
-                    const div = document.createElement('div');
-                    div.id = `entry_${index}`;
-                    div.innerHTML = entry.generateMarkup(index);
-                    entriesList.append(div);
-                }
+                const div = document.createElement('div');
+                div.id = `entry_${index}`;
+                div.innerHTML = entry.generateMarkup(index);
+                entriesList.append(div);
             }
         );
     }
@@ -244,13 +240,13 @@ class Repo {
         if (entry.state == 'NEW'){
             this.entries.splice(entryIndex, 1);
         } else {
-            entry.state = 'DELETE';
+            this.deleted.push(entry.id);
+            this.entries.splice(entryIndex, 1);
         }
         this.refreshEntryList();
     }
 
     swapEntries(eOneIdx, eTwoIdx){
-        console.log('Swapping', eOneIdx, eTwoIdx);
         // Swaps the positions of entry one and entry two in the repo's entry array
         [this.entries[eOneIdx], this.entries[eTwoIdx]] = [this.entries[eTwoIdx], this.entries[eOneIdx]];
         this.entries[eOneIdx].sequence = eOneIdx;
@@ -292,7 +288,7 @@ class Repo {
         // array[1] = references to Entry objects
         const toAdd = [[], []];
         const toChange = [[], []];
-        const toDelete = [[], []];
+        const toDelete = this.deleted;
         for (let entry of this.entries){
             switch (entry.state){
                 case 'NEW':
@@ -302,10 +298,6 @@ class Repo {
                 case 'CHANGE':
                     toChange[0].push(Entry.toJSON(entry));
                     toChange[1].push(entry);
-                    break;
-                case 'DELETE':
-                    toDelete[0].push(entry.id);
-                    toDelete[1].push(entry);
                     break;
             }
         }
@@ -328,12 +320,10 @@ class Repo {
                 }
             }
 
-            if (toDelete[0].length > 0){
-                await axios.delete(endPoint, {data: {'delete' : toDelete[0]}});
+            if (toDelete.length > 0){
+                await axios.delete(endPoint, {data: {'delete' : toDelete}});
                 changes=true;
-                for (let entry of toDelete[1]){
-                    entry.state = '_DELETED';
-                }
+                this.deleted = [];
             }
             
             if (changes){
@@ -383,7 +373,7 @@ function alertSave(clear=false){
     }
 }
 
-// Toggles the display of the fullscreen loading spinner, to be called while waiting for AJAX response
+// Toggles the display of the fullscreen loading spinner, to be called on load in while waiting for AJAX response
 function toggleLoading(){
     const loadDiv = document.getElementById('loading');
     const on = (loadDiv.style.display === 'block');
@@ -561,9 +551,11 @@ function entriesClickHandler(evt, repo){
     const [method, entryIndex] = evt.target.id.split('_');
     switch (method){
         case 'edit':
-            // Toggle visibility of Entry Editing Form
+            // Delete entry if CTRL is held
             if (evt.ctrlKey){
                 repo.deleteEntry(entryIndex);
+                alertSave();
+            // Toggle visibility of Entry Editing Form
             } else {
                 document.getElementById('entry-edit-div').style.display = 'block';
                 loadEntryIntoEditForm(repo, +entryIndex);
@@ -572,23 +564,17 @@ function entriesClickHandler(evt, repo){
         // Sequence shifting
         case 'up':
             console.log('click up', entryIndex);
-            if (entryIndex > 0){
+            if (+entryIndex > 0){
                 repo.swapEntries(+entryIndex, +entryIndex-1);
                 alertSave();
-            } else {
-                repo.swapEntries(+entryIndex, repo.entries.length - 1);
-                alertSave();
-            };
+            }
             break;
         case 'down':
             console.log('click down', entryIndex);
-            if (entryIndex < repo.entries.length -1){
+            if (+entryIndex < repo.entries.length-1){
                 repo.swapEntries(+entryIndex, +entryIndex+1);
                 alertSave();
-            } else {
-                repo.swapEntries(+entryIndex, 0);
-                alertSave();
-            };
+            }
             break;
     }
     console.log(repo);

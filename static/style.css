@@ -1,9 +1,11 @@
+/* Global Selectors */
+
 ul{
     list-style: none;
 }
 
 body{
-    background-color: rgb(65,65,65);
+    background-color: rgb(65, 60, 65);
 }
 
 a{
@@ -15,21 +17,14 @@ a.link-light{
     text-decoration: underline;
 }
 
-.less-margin{
-    margin-top: 0.5%;
-}
-
-.tBox-image{
-    object-fit: contain;
-    max-width: 40%;
-}
+/* Coloring */
 
 .text-dim-light{
     color: rgb(220,220,220);
 }
 
 .bg-dark-grey{
-    background-color: rgb(55,55,55);
+    background-color: rgb(55,53,55);
 }
 
 .bg-card-grey{
@@ -37,20 +32,68 @@ a.link-light{
 }
 
 .bg-header-grey{
-    background-color: rgb(50,50,50);
+    background-color: rgb(50,48,50);
+}
+
+.glass-white{
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0,0,0, 0.5);
+    padding: 2%;
+}
+
+.glass-black{
+    background-color: rgba(0,0,0, 0.15);
+}
+
+/* Entry Styling */
+
+.tBox-image{
+    object-fit: contain;
+    max-width: 40%;
 }
 
 .link-image{
     padding-top: 5px;
     padding-bottom: 5px;
+    padding-right: 5px;
     object-fit: contain;
 }
 
-.btn-purple{
-    background-color: #7812af;
-    border-color: #7812af;
+/* Unique Selectors */
+
+#controls{
+    padding-top: 2.5%;
+    padding-left: 1%;
+    padding-right: 1%;
+    top: 0;
+    position: sticky;
 }
 
+#repo-info{
+    margin-top: 1%;
+    padding: 1%;
+}
+
+.btn-wide{
+    width: 50%;
+}
+
+.landing-footer{
+    padding: 1%;
+    position: absolute;
+    bottom: 0;
+    width: 100vw;
+}
+
+/* Sizing */
+.fs-7{
+    font-size: .8rem;
+}
+.fs-8{
+    font-size: .7rem;
+}
+
+/* Modals, Fullscreen Elements */
 .modal {
     display: none;
     position: fixed;
@@ -60,45 +103,8 @@ a.link-light{
     background-color: rgba(0,0,0, 0.4);
 }
 
-#controls{
-    padding-top: 2.5%;
-    padding-left: 1%;
-    padding-right: 1%;
-    top: 0;
-    position: sticky;
-    background-color: rgb(45,45,45);
-}
-
-#repo-info{
-    margin-top: 1%;
-    padding: 1%;
-}
-
-
-.tip:hover{
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.btn-wide{
-    width: 50%;
-}
-
-#unsaved{
-    display: none;
-    width: fit-content;
-}
-
-.edit-icons>.bi:hover{
-    color: skyblue;
-}
-
 .spin-center{
     margin: 20% auto;
-}
-
-.fs-7{
-    font-size: .8rem;
 }
 
 .modal-doc {
@@ -110,7 +116,7 @@ a.link-light{
 }
 
 .modal-form {
-    background-color: #fefefe;
+    background-color: #fefefee0;
     margin: 13% auto;
     padding: 20px;
     border: 1px solid #888;
@@ -118,18 +124,19 @@ a.link-light{
     width: 50%;
 }
 
-/* Testing BG colors */
+.landing-gradient{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc);
+    background-size: 400% 400%;
 
-.purple{
-    background-color: purple;
-}
-
-.green {
-    background-color: green;
-}
-
-.orange {
-    background-color: orange;
+    -webkit-animation: AnimatedGradient 45s ease infinite;
+    -moz-animation: AnimatedGradient 45s ease infinite;
+    animation: AnimatedGradient 45s ease infinite;
 }
 
 /* Modal close button */
@@ -179,36 +186,15 @@ a.link-light{
     color: #0d6efd;
 }
 
-.landing-gradient{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: -1;
-    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc);
-    background-size: 400% 400%;
+/* Misc */
 
-    -webkit-animation: AnimatedGradient 45s ease infinite;
-    -moz-animation: AnimatedGradient 45s ease infinite;
-    animation: AnimatedGradient 45s ease infinite;
+.tip:hover{
+    text-decoration: underline;
+    cursor: pointer;
 }
 
-.glass-white{
-    background-color: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(0,0,0, 0.5);
-    padding: 2%;
-}
-
-.glass-black{
-    background-color: rgba(0,0,0, 0.15);
-}
-
-.landing-footer{
-    padding: 1%;
-    position: absolute;
-    bottom: 0;
-    width: 100vw;
+.edit-icons>.bi:hover{
+    color: #cd71ff;
 }
 
 /* Animations */
@@ -223,6 +209,18 @@ a.link-light{
     animation: fade-out 1s forwards;
     -webkit-animation: fade-out 1s forwards;
     -moz-animation: fade-out 1s forwards;
+}
+
+#create-div{
+    transition: 1s;
+}
+
+.hide-div{
+    transform: translate(-200%, 0%);
+}
+
+.show-div{
+    transform: translate(0,0);
 }
   
 @keyframes fade-in{
@@ -269,4 +267,18 @@ a.link-light{
     0%{background-position:7% 0%}
     50%{background-position:94% 100%}
     100%{background-position:7% 0%}
+}
+
+/* Testing Classes */
+
+.green{
+    background-color: green;
+}
+
+.red{
+    background-color: red;
+}
+
+.blue{
+    background-color: blue;
 }

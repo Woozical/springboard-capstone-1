@@ -6,7 +6,8 @@ function app(){
     createBtn.hidden = false;
     
     function toggleFormVisibility(){
-        createDiv.hidden = !createDiv.hidden;
+        createBtn.disabled = true;
+        createDiv.classList.add('show-div');
     }
 
     createBtn.addEventListener('click', toggleFormVisibility);

@@ -7,11 +7,11 @@ Untitled Repo
 {% block content %}
 <!-- To Do: WTForms for forms? -->
 <!-- To Do: Noscript version -->
-<div class="container-fluid" style="margin-top: 1%;">
+<div class="container-fluid mt-2">
     <div class="row justify-content-around">
-        <div class="col-9 bg-dark-grey rounded border border-dark" id="content">
-            <div id="repo-info" class="rounded bg-header-grey">
-                <h1 class="text-light" id="repo-title">{{repo.title}}</h1>
+        <div class="col-9 bg-dark-grey border border-dark" id="content">
+            <div id="repo-info" class="bg-header-grey">
+                <h1 class="display-6 text-light" id="repo-title">{{repo.title}}</h1>
                 <p class="text-dim-light" id="repo-desc">{{repo.description}}</p>
             </div>
             <br>
@@ -22,13 +22,13 @@ Untitled Repo
             </div>
         </div>
         <div class="col-auto text-center">
-            <div id="controls" class="rounded border border-secondary">
+            <div id="controls" class="border border-dark glass-black">
             {% if session['working_repo'] == repo.access_key %}
                 <div class="row">
-                    <h4 class="text-white">Controls</h3>
+                    <h4 class="text-light">Controls</h3>
                     <small id="help-btn" class="text-muted tip">(Help)</small>
                 </div>
-                <br>
+                <hr class="text-light">
                 <div class="row justify-content-center">
                     <div class="col-11">
                         <form id="new-link-form" action="">
@@ -46,7 +46,7 @@ Untitled Repo
                         <button title="Create Divider" class="btn btn-lg btn-primary" id="btn-new-divide"><i class="bi bi-hr"></i></button>
                     </div>
                 </div>
-                <br>
+                <hr class="text-light">
                 <div class="row justify-content-center">
                     <div class="col-12">
                         <button title="Save Changes" class="btn btn-outline-success" id="btn-save-changes"><i class="bi bi-save2"></i></button>

@@ -2,9 +2,53 @@ ul{
     list-style: none;
 }
 
+body{
+    background-color: rgb(65,65,65);
+}
+
+a{
+    text-decoration: none;
+    color: #669BBC;
+}
+
+a.link-light{
+    text-decoration: underline;
+}
+
+.less-margin{
+    margin-top: 0.5%;
+}
+
 .tBox-image{
     object-fit: contain;
     max-width: 40%;
+}
+
+.text-dim-light{
+    color: rgb(220,220,220);
+}
+
+.bg-dark-grey{
+    background-color: rgb(55,55,55);
+}
+
+.bg-card-grey{
+    background-color: rgb(45,45,45);
+}
+
+.bg-header-grey{
+    background-color: rgb(50,50,50);
+}
+
+.link-image{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    object-fit: contain;
+}
+
+.btn-purple{
+    background-color: #7812af;
+    border-color: #7812af;
 }
 
 .modal {
@@ -17,11 +61,19 @@ ul{
 }
 
 #controls{
+    padding-top: 2.5%;
+    padding-left: 1%;
+    padding-right: 1%;
     top: 0;
     position: sticky;
     background-color: rgb(45,45,45);
-    height: 65vh;
 }
+
+#repo-info{
+    margin-top: 1%;
+    padding: 1%;
+}
+
 
 .tip:hover{
     text-decoration: underline;
@@ -29,7 +81,7 @@ ul{
 }
 
 .btn-wide{
-    width: 25%;
+    width: 50%;
 }
 
 #unsaved{
@@ -120,7 +172,11 @@ ul{
 }
 
 .ruler-link{
-    text-decoration: none;
+    transition: color 200ms;
+}
+
+.ruler-link:hover{
+    color: #0d6efd;
 }
 
 .landing-gradient{
@@ -130,12 +186,12 @@ ul{
     left: 0;
     right: 0;
     z-index: -1;
-    background: linear-gradient(312deg, #c1121f, #669bbc);
+    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc);
     background-size: 400% 400%;
 
-    -webkit-animation: AnimatedGradient 30s ease infinite;
-    -moz-animation: AnimatedGradient 30s ease infinite;
-    animation: AnimatedGradient 30s ease infinite;
+    -webkit-animation: AnimatedGradient 45s ease infinite;
+    -moz-animation: AnimatedGradient 45s ease infinite;
+    animation: AnimatedGradient 45s ease infinite;
 }
 
 .glass-white{

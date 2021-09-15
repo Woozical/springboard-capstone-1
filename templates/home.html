@@ -14,27 +14,27 @@ LinkBin
         <div class="row">
             <div class="col text-white">
                 {% if last_edited %}
-                    Last Edited: <a class="text-white" href="/repo/{{last_edited.access_key}}">
+                    Last Edited: <i><a class="link-light" href="/repo/{{last_edited.access_key}}">
                     {% if last_edited.title %}
                         {{last_edited.title}}
                     {% else %}
                         {{last_edited.access_key}}
                     {% endif %}
-                    </a>
+                    </a></i>
                 {% endif %}
             </div>
             <div class="col">
-                <button class="btn btn-lg btn-primary" id="create-btn" hidden>New Repository</button>   
+                <button class="btn btn-lg btn-success" id="create-btn" hidden>New Repository</button>   
             </div>
             <div class="col text-white">      
                 {% if last_viewed %}
-                    Last Viewed: <a class="text-white" href="/repo/{{last_viewed.access_key}}"}>
+                    Last Viewed: <i><a class="link-light" href="/repo/{{last_viewed.access_key}}"}>
                     {% if last_viewed.title %}
                         {{last_viewed.title}}
                     {% else %}
                         {{last_viewed.access_key}}
                     {% endif %}
-                    </a>
+                    </a></i>
                 {% endif %}
             </div>
         </div>

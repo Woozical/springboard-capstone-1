@@ -23,7 +23,7 @@ class Component {
     static divider(index, entry){
         const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
         const text = entry.url ?
-            `<div class="ruler-words"><a class="ruler-link"href=${entry.url}>${entry.title}</a> ${Component.stars(entry.rating)}</div>` :
+            `<div class="ruler-words"><a class="ruler-link link-light"href=${entry.url}>${entry.title}</a> ${Component.stars(entry.rating)}</div>` :
             `<div class="ruler-words">${entry.title}  ${Component.stars(entry.rating)}</div>`;
         return `
         <div class="row">
@@ -48,22 +48,24 @@ class Component {
             ${edit}
         </div>
         <div class="col-11">
-            <div class="card">
+            <div class="card bg-card-grey">
+            <div class="row">
+                <div class="col-10">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-10">
-                            <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
-                            <p class="card-text fs-7">${entry.description}</p>
-                            <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
-                        </div>
-                        <div class="col-2">
-                            <img onerror="imgError(this);" src="${entry.image}" class="card-img rounded float-right">
-                        </div>
-                    </div>
+                    <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
+                    <p class="card-text fs-7">${entry.description}
+                    </p>
+                    <small class="card-text"><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
+                </div>
+                </div>
+                <div class="col-2">
+                    <img height="100px;" onerror="imgError(this);" src="${entry.image}" class="card-img link-image rounded float-right">
                 </div>
             </div>
+            </div>
         </div>
-        </div>`;
+        </div>
+        <br>`;
     }
 
     static textBox(index, entry){
@@ -72,7 +74,7 @@ class Component {
             `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
             '';
         const image = entry.image ?
-            `<img onerror="imgError(this);" class="tBox-image" src=${entry.image} align="right" />` : 
+            `<img onerror="imgError(this);" class="tBox-image rounded" src=${entry.image} align="right" />` : 
             '';
         return `
         <div class="row">
@@ -80,7 +82,7 @@ class Component {
                 ${edit}
             </div>
             <div class="col-11">
-                <div class="card">
+                <div class="card bg-card-grey">
                     <div class="card-body">
                         <h5 class="card-title text-center">${entry.title}  ${Component.stars(entry.rating)}</h5>
                         ${image}
@@ -89,7 +91,8 @@ class Component {
                     ${link}
                 </div>
             </div>
-        </div>`
+        </div>
+        <br>`
     }
 }
 
@@ -358,7 +361,7 @@ function flash(message, category){
     }, 2000);
     messageTimer = setTimeout(() =>{
         flashDiv.classList.remove(`alert-${category}`);
-        flashDiv.innerText = '';
+        flashDiv.innerHTML = '<span>&#8203;</span>';
     }, 3100);
 }
 

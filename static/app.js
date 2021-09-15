@@ -2,8 +2,6 @@ const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
 // TO DO: load-in spinner
-// TO DO: Entry sorting, re-ordering, rating
-// TO DO: Delete repo
 
 class Component {
 
@@ -55,7 +53,7 @@ class Component {
                     <div class="row">
                         <div class="col-10">
                             <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
-                            <p class="card-text">${entry.description}</p>
+                            <p class="card-text fs-7">${entry.description}</p>
                             <small><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
                         </div>
                         <div class="col-2">
@@ -341,7 +339,6 @@ class Repo {
             else{
                 flash('Repo up to date.', 'info');
             }
-
         } catch (err) {
             throw `Could not save changes. Error msg: ${err}`;
         }
@@ -364,14 +361,34 @@ function imgError(image){
     return true;
 }
 
+function alertSave(clear=false){
+    const div = document.getElementById('unsaved');
+    if (clear){
+        div.style.display= 'none';
+    } else {
+        div.style.display = 'block';
+    }
+}
+
+// Toggles the display of the fullscreen loading spinner, to be called while waiting for AJAX response
+function toggleLoading(){
+    const loadDiv = document.getElementById('loading');
+    const on = (loadDiv.style.display === 'block');
+    loadDiv.style.display = on ? 'none' : 'block';
+}
+
 async function loadRepoData(accessKey){
+    toggleLoading();
     let res
     try {
+        
         res = await axios.get(`/api/repo/${accessKey}`);
     } catch (err) {
         if (err.response.status === 401 || err.response.status === 403) {
             // Redirect on unauthorized
             window.location = `/repo/auth?access_key=${accessKey}`; 
+        } else {
+            flash('Critical Error: Could not load repository data.', 'danger');
         }
     }
     
@@ -380,7 +397,6 @@ async function loadRepoData(accessKey){
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
         repo.refreshEntryList();
-        console.log(repo);
         // Only bother with setting up editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
@@ -389,7 +405,9 @@ async function loadRepoData(accessKey){
             // Always set up the control div handler, so user can click edit button to bring up auth
             document.getElementById('controls').addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
         }
+        
     }
+    toggleLoading();
 }
 
 function initEditEventListeners(repo){
@@ -407,12 +425,12 @@ function initEditEventListeners(repo){
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
     repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
     
-    newLinkForm.addEventListener('submit', (evt, repo) => {
+    newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
         const link = newLinkForm.new.value;
         repo.addLink(link);
         newLinkForm.new.value = '';
-        window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+        alertSave();
     });
 
     repoEditForm.addEventListener('submit', (evt) => {
@@ -462,26 +480,21 @@ function modalCloseHandlers(){
 
 }
 
-function unSavedChangesHandler(evt){
-    evt.preventDefault();
-    return evt.returnValue = 'Are you sure you want to exit? This repo has unsaved changes.';
-}
-
 // Event handler for the control panel
 function controlClickHandler(evt, repo){
     switch (evt.target.id){
         case 'btn-new-divide':
             repo.addDivider();
-            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            alertSave();
             break;
         case 'btn-new-tbox':
             repo.addTextBox();
-            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            alertSave();
             break;
         case 'btn-save-changes':
             try{
                 repo.commitEntryChanges();
-                window.removeEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave(clear=true);
             } catch {
                 flash("Something went wrong. Please try again later.", 'danger')
             }
@@ -518,28 +531,32 @@ function entriesClickHandler(evt, repo){
     switch (method){
         case 'edit':
             // Toggle visibility of Entry Editing Form
-            document.getElementById('entry-edit-div').style.display = 'block';
-            loadEntryIntoEditForm(repo, +entryIndex);
+            if (evt.ctrlKey){
+                repo.deleteEntry(entryIndex);
+            } else {
+                document.getElementById('entry-edit-div').style.display = 'block';
+                loadEntryIntoEditForm(repo, +entryIndex);
+            }
             break;
         // Sequence shifting
         case 'up':
             console.log('click up', entryIndex);
             if (entryIndex > 0){
                 repo.swapEntries(+entryIndex, +entryIndex-1);
-                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave();
             } else {
                 repo.swapEntries(+entryIndex, repo.entries.length - 1);
-                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave();
             };
             break;
         case 'down':
             console.log('click down', entryIndex);
             if (entryIndex < repo.entries.length -1){
                 repo.swapEntries(+entryIndex, +entryIndex+1);
-                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave();
             } else {
                 repo.swapEntries(+entryIndex, 0);
-                window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave();
             };
             break;
     }
@@ -567,7 +584,7 @@ function entryEditSubmitHandler(evt, repo){
     entryEditForm.entryImage.value = '';
     entryEditForm.entryRating.value = 0;
     document.getElementById('entry-edit-div').style.display = 'none';
-    window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+    alertSave();
     repo.refreshEntryMarkup(entryIndex);
 }
 
@@ -575,7 +592,7 @@ function entryDeleteHandler(evt, repo){
     const form = document.getElementById('entry-edit-form');
     const entryIndex = form.getAttribute('data-entryIndex');
     repo.deleteEntry(entryIndex);
-    window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+    alertSave();
     document.getElementById('entry-edit-div').style.display = 'none';
 }
 

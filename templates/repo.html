@@ -18,7 +18,8 @@ Untitled Repo
                 </noscript>
             </div>
         </div>
-        <div class="col-4" id="controls">
+        <div class="col-4">
+            <div id="controls">
             {% if session['working_repo'] == repo.access_key %}
             <button class="btn btn-success" id="btn-save-changes">Save Changes</button>
             <form id="new-link-form" action="">
@@ -27,6 +28,8 @@ Untitled Repo
             </form>
             <button class="btn btn-outline-primary" id="btn-new-divide">Add Divider</button>
             <button class="btn btn-outline-primary" id="btn-new-tbox">Add TextBox</button>
+            <br>
+            <small class="text-muted">Tip: Hold CTRL when clicking an entry's edit button to quickly delete it.</small>
             <hr>
             <button class="btn btn-outline-info" id="btn-edit-repo">
                 <i class="bi bi-gear"></i>Edit Repo Info
@@ -36,25 +39,31 @@ Untitled Repo
             <button id="btn-auth-repo">Edit</button>
             {% endif %}
             <div class="text-center" id="flashes"></div>
+            <div class="text-center alert alert-warning" id="unsaved">You have unsaved changes.</div>
+            </div>
         </div>
     </div>
-
-{% if session['working_repo'] == repo.access_key %}
-<!-- To Do: Make forms modals -->
-<!-- Move <form>s into templates/forms and include -->
-<div class="modal" role="dialog" id="repo-delete-div">
-    {% include 'forms/repo-delete.html' %}
-</div>
-<div class="modal" role="form" id="repo-edit-div">
-    {% include 'forms/repo-edit.html' %}
-</div>
-{% endif %}
-
-{% if session['working_repo'] == repo.access_key %}
-<div class="modal" id="entry-edit-div">
-    {% include 'forms/entry-edit.html' %}
-</div>
-{% endif %}
+    
+    <!-- Modals -->
+    <div class="modal" role="status" id="loading">
+        <div class="text-center">
+            <div class="text-white spinner-border spin-center" style="width: 5rem; height: 5rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    {% if session['working_repo'] == repo.access_key %}
+    <div class="modal" role="dialog" id="repo-delete-div">
+        {% include 'forms/repo-delete.html' %}
+    </div>
+    <div class="modal" role="form" id="repo-edit-div">
+        {% include 'forms/repo-edit.html' %}
+    </div>
+    <div class="modal" id="entry-edit-div">
+        {% include 'forms/entry-edit.html' %}
+    </div>
+    {% endif %}
+    <!--  -->
 </div>
 
 {% endblock %}

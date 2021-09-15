@@ -11,9 +11,9 @@ class Component {
 
     static editButtons(index){
         return `
-        <div>
+        <div class="edit-icons">
             <i class="bi bi-caret-up" id="up_${index}"></i>
-            <div>
+            <div class="edit-icons">
                 <i class="bi bi-gear" id="edit_${index}"></i>
             </div>
             <i class="bi bi-caret-down" id="down_${index}"></i>
@@ -344,14 +344,22 @@ class Repo {
         }
     }
 }
-let flashTimer
+let opacityTimer, messageTimer;
 function flash(message, category){
-    clearInterval(flashTimer);
+    clearInterval(opacityTimer);
+    clearInterval(messageTimer);
     const flashDiv = document.getElementById('flashes');
-    flashDiv.innerHTML = `<div class="alert alert-${category}">${message}</div>`;
-    flashTimer = setTimeout(()=>{
-        flashDiv.innerHTML = '';
+    flashDiv.classList.add(`alert-${category}`, 'fade-in');
+    flashDiv.classList.remove('fade-out');
+    flashDiv.innerText = message;
+    opacityTimer = setTimeout(()=>{
+        flashDiv.classList.remove('fade-in');
+        flashDiv.classList.add('fade-out');
     }, 2000);
+    messageTimer = setTimeout(() =>{
+        flashDiv.classList.remove(`alert-${category}`);
+        flashDiv.innerText = '';
+    }, 3100);
 }
 
 // Replace broken link thumbnails with generic globe image
@@ -361,12 +369,14 @@ function imgError(image){
     return true;
 }
 
-function alertSave(clear=false){
-    const div = document.getElementById('unsaved');
+function alertSave(clear=false){    
+    const btn = document.getElementById('btn-save-changes');
     if (clear){
-        div.style.display= 'none';
+        btn.classList.remove('btn-outline-warning');
+        btn.classList.add('btn-outline-success');
     } else {
-        div.style.display = 'block';
+        btn.classList.remove('btn-outline-success');
+        btn.classList.add('btn-outline-warning');
     }
 }
 
@@ -409,7 +419,6 @@ async function loadRepoData(accessKey){
     }
     toggleLoading();
 }
-
 function initEditEventListeners(repo){
     const controls = document.getElementById('controls');
     const entryList = document.getElementById('repo-entries');
@@ -427,10 +436,14 @@ function initEditEventListeners(repo){
     
     newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        const link = newLinkForm.new.value;
-        repo.addLink(link);
-        newLinkForm.new.value = '';
-        alertSave();
+        const links = newLinkForm.new.value;
+        if (links){
+            for (let link of links.split('\n')){
+                repo.addLink(link);
+            }
+            alertSave();
+            newLinkForm.new.value = '';
+        }
     });
 
     repoEditForm.addEventListener('submit', (evt) => {
@@ -444,6 +457,7 @@ function modalCloseHandlers(){
     const repoModal = document.getElementById('repo-edit-div');
     const deleteModal = document.getElementById('repo-delete-div');
     const entryModal = document.getElementById('entry-edit-div');
+    const helpModal = document.getElementById('help-modal');
 
     repoModal.addEventListener('click', function(evt){
         switch(evt.target.id){
@@ -478,6 +492,17 @@ function modalCloseHandlers(){
         }
     });
 
+    helpModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-help-modal':
+                helpModal.style.display = 'none';
+                break;
+            case 'help-modal':
+                helpModal.style.display = 'none';
+                break;
+        }
+    })
+
 }
 
 // Event handler for the control panel
@@ -486,6 +511,9 @@ function controlClickHandler(evt, repo){
         case 'btn-new-divide':
             repo.addDivider();
             alertSave();
+            break;
+        case "help-btn":
+            document.getElementById('help-modal').style.display = 'block';
             break;
         case 'btn-new-tbox':
             repo.addTextBox();

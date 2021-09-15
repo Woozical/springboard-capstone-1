@@ -18,28 +18,33 @@ Untitled Repo
                 </noscript>
             </div>
         </div>
-        <div class="col-4">
+        <div class="col-4 text-center">
             <div id="controls">
             {% if session['working_repo'] == repo.access_key %}
-            <button class="btn btn-success" id="btn-save-changes">Save Changes</button>
-            <form id="new-link-form" action="">
-                <input type="text" id="input-url" name="new" placeholder="Paste link here">
-                <button class="btn btn-primary btn-sm">Enter</button>
-            </form>
-            <button class="btn btn-outline-primary" id="btn-new-divide">Add Divider</button>
-            <button class="btn btn-outline-primary" id="btn-new-tbox">Add TextBox</button>
-            <br>
-            <small class="text-muted">Tip: Hold CTRL when clicking an entry's edit button to quickly delete it.</small>
-            <hr>
-            <button class="btn btn-outline-info" id="btn-edit-repo">
-                <i class="bi bi-gear"></i>Edit Repo Info
-            </button>
-            <button class="btn btn-outline-danger" id="btn-delete-repo">Delete Repo</button>
-            {% else %}
-            <button id="btn-auth-repo">Edit</button>
-            {% endif %}
-            <div class="text-center" id="flashes"></div>
-            <div class="text-center alert alert-warning" id="unsaved">You have unsaved changes.</div>
+                <h4 class="text-white">Controls</h3>
+                <small id="help-btn" class="text-muted tip">(Help)</small>
+                <form id="new-link-form" action="">
+                    <textarea name="new" id="input-url" cols="50" rows="2" placeholder="Paste links here..."></textarea>
+                </form>
+                
+                <button title="Add Links" form="new-link-form" class="btn btn-wide btn-lg btn-primary">
+                    <i class="bi bi-link"></i>
+                </button>
+                <hr>
+                <button title="Create Text Box" class="btn btn-lg btn-primary" id="btn-new-tbox"><i class="bi bi-blockquote-right"></i></button>
+                <button title="Create Divider" class="btn btn-lg btn-primary" id="btn-new-divide"><i class="bi bi-hr"></i></button>
+                <hr>
+                <button title="Save Changes" class="btn btn-outline-success" id="btn-save-changes"><i class="bi bi-save2"></i></button>
+                <button title="Edit Repository Information" class="btn btn-outline-info" id="btn-edit-repo">
+                    <i class="bi bi-gear"></i>
+                </button>
+                <button title="Delete Repository" class="btn btn-outline-danger" id="btn-delete-repo"><i class="bi bi-trash"></i></button>
+                {% else %}
+                <button id="btn-auth-repo">Edit</button>
+                {% endif %}
+                <hr>
+                <div class="text-center alert" id="flashes"></div>
+                <br>
             </div>
         </div>
     </div>
@@ -51,6 +56,9 @@ Untitled Repo
               <span class="visually-hidden">Loading...</span>
             </div>
         </div>
+    </div>
+    <div class="modal" id="help-modal">
+        {% include 'docs/help.html' %}
     </div>
     {% if session['working_repo'] == repo.access_key %}
     <div class="modal" role="dialog" id="repo-delete-div">

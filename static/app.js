@@ -1,7 +1,6 @@
 const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
-// TO DO: Fix icons in buttons not triggering the button
 // TO DO: Segment up this behemoth
 
 class Component {
@@ -522,7 +521,8 @@ function modalCloseHandlers(){
 
 // Event handler for the control panel
 function controlClickHandler(evt, repo){
-    switch (evt.target.id){
+    const id = evt.target.classList.contains('bi') ? evt.target.parentNode.id : evt.target.id;
+    switch (id){
         case 'btn-new-divide':
             repo.addDivider();
             alertSave();

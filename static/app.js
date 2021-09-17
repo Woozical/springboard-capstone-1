@@ -1,6 +1,9 @@
 const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
+// TO DO: Fix icons in buttons not triggering the button
+// TO DO: Segment up this behemoth
+
 class Component {
 
     static stars(count){
@@ -103,7 +106,7 @@ class Entry {
         this.image= image;
         this.url = url;
         this.type = type;
-        this.rating = rating;
+        this.rating = rating ? rating: 0;
         this.sequence = sequence;
         this.state = state;
     }
@@ -117,7 +120,7 @@ class Entry {
     }
 
    static toJSON({id, title, description, image, url, type, rating, sequence}){
-        return {id, title, description, image, url, type, rating, sequence};
+        return {id, title, description, image, url, type, rating : +rating, sequence : +sequence};
     }
 
     updateWithMetaData(metaData){
@@ -243,19 +246,38 @@ class Repo {
             this.deleted.push(entry.id);
             this.entries.splice(entryIndex, 1);
         }
+        this.resyncSequence();
         this.refreshEntryList();
     }
 
-    swapEntries(eOneIdx, eTwoIdx){
-        // Swaps the positions of entry one and entry two in the repo's entry array
-        [this.entries[eOneIdx], this.entries[eTwoIdx]] = [this.entries[eTwoIdx], this.entries[eOneIdx]];
-        this.entries[eOneIdx].sequence = eOneIdx;
-        this.entries[eTwoIdx].sequence = eTwoIdx;
-        this.entries[eOneIdx].state = 'CHANGE';
-        this.entries[eTwoIdx].state = 'CHANGE';
+    shiftEntry(idx, dir){
+        // Shift the position of this.entries[idx] by direction (e.g. +1, -1, +2)
+        const elem = this.entries[idx];
+        const len = this.entries.length;
 
-        this.refreshEntryMarkup(eOneIdx);
-        this.refreshEntryMarkup(eTwoIdx);
+        this.entries.splice(idx, 1);
+        
+        // Wrap-around if moving upwards from 0, or downwards from length-1
+        if ((Math.abs(dir) != dir) && (idx === 0)){
+            this.entries.splice((len+dir), 0, elem);
+        } else {
+            this.entries.splice((idx+dir) % len, 0, elem);
+        }
+        // [this.entries[eOneIdx], this.entries[eTwoIdx]] = [this.entries[eTwoIdx], this.entries[eOneIdx]];
+        
+        this.resyncSequence();
+        this.refreshEntryList();
+    }
+
+    // Iterates through all entries in repo and sets their sequence to their index in this.entries
+    resyncSequence(){
+        for (let idx in this.entries){
+            const entry = this.entries[idx];
+            if (entry.sequence != idx){
+                entry.sequence = idx;
+                entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE';
+            }
+        }
     }
 
     async commitRepoChanges(){
@@ -564,20 +586,15 @@ function entriesClickHandler(evt, repo){
         // Sequence shifting
         case 'up':
             console.log('click up', entryIndex);
-            if (+entryIndex > 0){
-                repo.swapEntries(+entryIndex, +entryIndex-1);
-                alertSave();
-            }
+            repo.shiftEntry(+entryIndex, -1);
+            alertSave();
             break;
         case 'down':
             console.log('click down', entryIndex);
-            if (+entryIndex < repo.entries.length-1){
-                repo.swapEntries(+entryIndex, +entryIndex+1);
-                alertSave();
-            }
+            repo.shiftEntry(+entryIndex, +1);
+            alertSave();
             break;
     }
-    console.log(repo);
 }
 
 function entryEditSubmitHandler(evt, repo){

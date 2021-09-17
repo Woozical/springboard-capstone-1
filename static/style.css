@@ -1,0 +1,284 @@
+/* Global Selectors */
+
+ul{
+    list-style: none;
+}
+
+body{
+    background-color: rgb(65, 60, 65);
+}
+
+a{
+    text-decoration: none;
+    color: #669BBC;
+}
+
+a.link-light{
+    text-decoration: underline;
+}
+
+/* Coloring */
+
+.text-dim-light{
+    color: rgb(220,220,220);
+}
+
+.bg-dark-grey{
+    background-color: rgb(55,53,55);
+}
+
+.bg-card-grey{
+    background-color: rgb(45,45,45);
+}
+
+.bg-header-grey{
+    background-color: rgb(50,48,50);
+}
+
+.glass-white{
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(0,0,0, 0.5);
+    padding: 2%;
+}
+
+.glass-black{
+    background-color: rgba(0,0,0, 0.15);
+}
+
+/* Entry Styling */
+
+.tBox-image{
+    object-fit: contain;
+    max-width: 40%;
+}
+
+.link-image{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 5px;
+    object-fit: contain;
+}
+
+/* Unique Selectors */
+
+#controls{
+    padding-top: 2.5%;
+    padding-left: 1%;
+    padding-right: 1%;
+    top: 0;
+    position: sticky;
+}
+
+#repo-info{
+    margin-top: 1%;
+    padding: 1%;
+}
+
+.btn-wide{
+    width: 50%;
+}
+
+.landing-footer{
+    padding: 1%;
+    position: absolute;
+    bottom: 0;
+    width: 100vw;
+}
+
+/* Sizing */
+.fs-7{
+    font-size: .8rem;
+}
+.fs-8{
+    font-size: .7rem;
+}
+
+/* Modals, Fullscreen Elements */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0, 0.4);
+}
+
+.spin-center{
+    margin: 20% auto;
+}
+
+.modal-doc {
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 70%;
+}
+
+.modal-form {
+    background-color: #fefefe;
+    margin: 13% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 5px;
+    width: 50%;
+}
+
+.landing-gradient{
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
+    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc);
+    background-size: 400% 400%;
+
+    -webkit-animation: AnimatedGradient 45s ease infinite;
+    -moz-animation: AnimatedGradient 45s ease infinite;
+    animation: AnimatedGradient 45s ease infinite;
+}
+
+/* Modal close button */
+.close {
+    color: #aaa;
+    float: right;
+}
+.close:hover, .close:focus{
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Horizontal Ruler with Text */
+
+.ruler {
+    display: table;
+}
+
+.ruler>div {
+    display: table-cell;
+    white-space:nowrap;
+}
+
+.ruler-line>div {
+    border-bottom: 1px solid silver;
+    height: 1px;
+}
+
+.ruler-words {
+    padding: 0 5px;
+    text-transform: uppercase;
+    font-family: sans-serif;
+    font-weight: bold;
+}
+
+.ruler-line {
+    width: 50%;
+    vertical-align: middle;
+}
+
+.ruler-link{
+    transition: color 200ms;
+}
+
+.ruler-link:hover{
+    color: #0d6efd;
+}
+
+/* Misc */
+
+.tip:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.edit-icons>.bi:hover{
+    color: #cd71ff;
+}
+
+/* Animations */
+
+.fade-in{
+    animation: fade-in 1s forwards;
+    -webkit-animation: fade-in 1s forwards;
+    -moz-animation: fade-in 1s forwards;
+}
+  
+.fade-out{
+    animation: fade-out 1s forwards;
+    -webkit-animation: fade-out 1s forwards;
+    -moz-animation: fade-out 1s forwards;
+}
+
+#create-div{
+    transition: 1s;
+}
+
+.hide-div{
+    transform: translate(-200%, 0%);
+}
+
+.show-div{
+    transform: translate(0,0);
+}
+  
+@keyframes fade-in{
+    from{opacity: 0;}
+    to{opacity: 1;}
+}
+
+@keyframes fade-out{
+    from{opacity: 1;}
+    to{opacity: 0;}
+}
+
+@-moz-keyframes fade-in{
+    from{opacity: 0;}
+    to{opacity: 1;}
+}
+
+@-moz-keyframes fade-out{
+    from{opacity: 1;}
+    to{opacity: 0;}
+}
+
+@-webkit-keyframes fade-in{
+    from{opacity: 0;}
+    to{opacity: 1;}
+}
+
+@-webkit-keyframes fade-out{
+    from{opacity: 1;}
+    to{opacity: 0;}
+}
+
+@-webkit-keyframes AnimatedGradient {
+    0%{background-position:7% 0%}
+    50%{background-position:94% 100%}
+    100%{background-position:7% 0%}
+}
+@-moz-keyframes AnimatedGradient {
+    0%{background-position:7% 0%}
+    50%{background-position:94% 100%}
+    100%{background-position:7% 0%}
+}
+@keyframes AnimatedGradient {
+    0%{background-position:7% 0%}
+    50%{background-position:94% 100%}
+    100%{background-position:7% 0%}
+}
+
+/* Testing Classes */
+
+.green{
+    background-color: green;
+}
+
+.red{
+    background-color: red;
+}
+
+.blue{
+    background-color: blue;
+}

@@ -1,13 +1,38 @@
-<form action="/repo/create" method="POST">
+<form action="/repo/create" method="POST" id='create-form'>
     {{ form.hidden_tag() }}
-    {{form.title.label}}
-    {{form.title()}}
-    {{form.description.label}}
-    {{form.description()}}
+    <div class="row">
+        <div class="col-8">
+            {{form.title.label}}
+            {{form.title(class="form-control form-control-lg", placeholder="(Optional)")}}
+            <small class="text-danger" id="title-errors"> </small>
+        </div>
+        <div class="col">
+            {{form.pass_phrase.label}}
+            {{form.pass_phrase(class="form-control form-control-lg", placeholder="Required")}}
+            <input type="checkbox" name="show_pw" id="show-pw-input">
+            <label for="show-pw-input">Show</label>
+            <small class="form-text"><i>Users must enter the password to edit the repository.</i></small>
+            <small class="text-danger" id="pass_phrase-errors"> </small>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            {{form.description.label}}
+            {{form.description(class="form-control", placeholder="(Optional)")}}
+            <small class="text-danger" id="description-errors"> </small>
+        </div>
+    </div>
     <br>
-    {{form.pass_phrase.label}}
-    {{form.pass_phrase()}}
-    {{form.is_private.label}}
-    {{form.is_private()}}
-    <button>Submit</button>
+    <div class="row">
+        <div class="col">
+            {{form.is_private.label(class="form-check-label")}}
+            {{form.is_private(class="form-check-input")}}
+            <small class="form-text">
+                The password must be entered to view the repository. <br>
+                Note: This still gives editing access.
+            </small>
+        </div>
+    </div>
+    <br>
+    <button class="btn btn-success">Create</button>
 </form>

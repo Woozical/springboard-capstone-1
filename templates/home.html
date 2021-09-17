@@ -5,13 +5,57 @@ LinkBin
 {% endblock %}
 
 {% block content %}
-<h1>Welcome</h1>
-<p>This is the landing page</p>
-<button id="create-btn">New Repository</button>
-<div id="create-div" hidden>
-    {% include 'forms/create-repo.html' %}
-</div>
+<div class="landing-gradient"></div>
+<div class="container">
+    <div class="text-center">
+        <h1 class="display-1 text-white">LinkBin</h1>
+        <p class="text-white">Save and share your links with style.</p>
+        <br>
+        <div class="row">
+            <div class="col text-white">
+                {% if last_edited %}
+                    Last Edited: <i><a class="link-light" href="/repo/{{last_edited.access_key}}">
+                    {% if last_edited.title %}
+                        {{last_edited.title}}
+                    {% else %}
+                        {{last_edited.access_key}}
+                    {% endif %}
+                    </a></i>
+                {% endif %}
+            </div>
+            <div class="col">
+                <button class="btn btn-lg btn-success" id="create-btn" hidden>New Repository</button>   
+            </div>
+            <div class="col text-white">      
+                {% if last_viewed %}
+                    Last Viewed: <i><a class="link-light" href="/repo/{{last_viewed.access_key}}"}>
+                    {% if last_viewed.title %}
+                        {{last_viewed.title}}
+                    {% else %}
+                        {{last_viewed.access_key}}
+                    {% endif %}
+                    </a></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <hr class="text-white">
+    <div class="glass-white text-left hide-div" id="create-div">
+        <h4>Repository Details</h4>
+        {% include 'forms/create-repo.html' %}
+    </div>
+    <noscript>
+    <div class="glass-white text-left">
+        <h4>New Repository</h4>
+        {% include 'forms/create-repo.html' %}
+    </div>
+    </noscript>
 
+</div>
+<small class="landing-footer glass-black text-center text-white">
+    This website makes use of cookies to provide core functionality. By continuing to make use of this website,
+    you consent to the storing of cookies on your device.
+</small>
 {% endblock %}
 
 {% block script %}

@@ -16,18 +16,38 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
 connect_db(app)
 db.create_all()
 
-## Front-end Layer
+@app.before_request
+def before_request_func():
+    if 'SameSite' not in session:
+        session['SameSite'] = 'Strict'
 
+@app.errorhandler(404)
+def not_found_view(e):
+    return render_template('not-found.html')
+
+## Front-end Layer
 @app.route('/')
 def home_view():
     form = NewRepoForm()
-    session['SameSite'] = 'Strict'
-    return render_template('home.html', form=form)
+    sAuth = 'working_repo' in session
+    sView = 'last_viewed' in session
+
+    if sAuth and sView:
+        if session['working_repo'] == session['last_viewed']:
+            last_edited = last_viewed = Repo.query.get(session['last_viewed'])
+        else:
+            last_edited = Repo.query.get(session['working_repo'])
+            last_viewed = Repo.query.get(session['last_viewed'])
+    else:
+        last_edited = Repo.query.get(session['working_repo']) if sAuth else None
+        last_viewed = Repo.query.get(session['last_viewed']) if sView else None
+
+    return render_template('home.html', form=form, last_edited=last_edited, last_viewed=last_viewed)
 
 @app.route('/repo/<access_key>')
 def repo_view(access_key):
@@ -36,6 +56,7 @@ def repo_view(access_key):
         return redirect(url_for('repo_auth', access_key=access_key))
     else:
         repo.update_last_visited()
+        session['last_viewed'] = repo.access_key
         return render_template('repo.html', repo=repo)
 
 @app.route('/repo/auth', methods=['GET', 'POST'])
@@ -55,11 +76,22 @@ def repo_auth():
         else:
             flash('Wrong password')
         
-    return render_template('/forms/auth-repo.html', form=form)
+    return render_template('auth.html', form=form)
 
 
-@app.route('/repo/create', methods=['POST'])
-def repo_create():
+### API Layer ###
+
+@app.route('/api/scrape')
+def api_scrape_url():
+    # TO-DO: Implement opengraphr API to plug metadata gaps
+    if 'working_repo' in session:
+        meta_data = get_tags(request.args['url'])
+        return jsonify(msg="success", data=meta_data)
+    else:
+        return jsonify(msg="failure, unauthorized"), 401
+
+@app.route('/api/repo/create', methods=['POST'])
+def api_repo_create():
     form = NewRepoForm()
     if form.validate_on_submit():
         # On the miniscule chance we generate a non-unique access key, loop and try again.
@@ -76,25 +108,12 @@ def repo_create():
                 db.session.commit()
                 success = True
             except:
+                db.session.rollback()
                 success = False
         session['working_repo'] = new_repo.access_key
-        return redirect(
-            url_for('repo_view', access_key=new_repo.access_key)
-        )
+        return jsonify(message='success', created=new_repo.access_key)
     else:
-        return redirect(url_for('home_view'))
-
-
-### API Layer ###
-
-@app.route('/api/scrape')
-def api_scrape_url():
-    # TO-DO: Implement opengraphr API to plug metadata gaps
-    if 'working_repo' in session:
-        meta_data = get_tags(request.args['url'])
-        return jsonify(msg="success", data=meta_data)
-    else:
-        return jsonify(msg="failure, unauthorized"), 401
+        return jsonify(message="failed", errors=form.errors_to_json()), 400
 
 
 @app.route('/api/repo/<access_key>', methods=['GET'])
@@ -145,6 +164,7 @@ def api_repo_delete(access_key):
     
     db.session.delete(repo)
     db.session.commit()
+    del session['working_repo']
     return jsonify(message=f"success. {access_key} deleted."), 200
 
 @app.route('/api/repo/<access_key>', methods=['PATCH'])
@@ -175,9 +195,9 @@ def api_repo_patch(access_key):
     if 'title' in data:
         if not isinstance(data['title'], str):
             errors['title'] = 'Must be of type string. '
-        elif len(data['title']) > 100:
+        elif len(data['title']) > 50:
             err = errors.get('title', '')
-            err = err + 'Must be 100 characters or less'
+            err = err + 'Must be 50 characters or less'
             errors['title'] = err
         else:
             repo.title = data['title']
@@ -185,7 +205,7 @@ def api_repo_patch(access_key):
     if 'description' in data:
         if not isinstance(data['description'], str):
             errors['description'] = 'Must be of type string. '
-        elif len(data['description']) > 100:
+        elif len(data['description']) > 300:
             err = errors.get('description', '')
             err = err + 'Must be 300 characters or less'
             errors['description'] = err

@@ -1,21 +1,111 @@
 const NOIMG = '/static/images/globe.png';
 const AUTH = {view : 0, edit : 1} // For rendering purposes
 
-// TO DO: load-in spinner
-// TO DO: Entry sorting, re-ordering, rating
-// TO DO: Delete repo
+// TO DO: Segment up this behemoth
+
+class Component {
+
+    static stars(count){
+        return '<i class="text-warning bi bi-star-fill"></i>'.repeat(count);
+    }
+
+    static editButtons(index){
+        return `
+        <div class="edit-icons">
+            <i class="bi bi-caret-up" id="up_${index}"></i>
+            <div class="edit-icons">
+                <i class="bi bi-gear" id="edit_${index}"></i>
+            </div>
+            <i class="bi bi-caret-down" id="down_${index}"></i>
+        </div>`;
+    }
+
+    static divider(index, entry){
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const text = entry.url ?
+            `<div class="ruler-words"><a class="ruler-link link-light"href=${entry.url}>${entry.title}</a> ${Component.stars(entry.rating)}</div>` :
+            `<div class="ruler-words">${entry.title}  ${Component.stars(entry.rating)}</div>`;
+        return `
+        <div class="row">
+            <div class="col-auto">
+                ${edit}
+            </div>
+            <div class="col-11">
+                <div class="ruler">
+                    <div class="ruler-line"><div></div></div>
+                    ${text}
+                    <div class="ruler-line"><div></div></div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    static linkCard(index, entry){
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const image = entry.image ? entry.image : NOIMG;
+        return `
+        <div class="row mb-1">
+        <div class="col-auto">
+            ${edit}
+        </div>
+        <div class="col-11">
+            <div class="card bg-card-grey">
+            <div class="row">
+                <div class="col-10">
+                <div class="card-body">
+                    <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
+                    <p class="card-text fs-7">${entry.description.replace(/\n/g, '<br>')}
+                    </p>
+                    <small class="card-text fs-8"><a class="text-muted" href="${entry.url}">${entry.url}</a></small>
+                </div>
+                </div>
+                <div class="col-2">
+                    <img height="100px;" onerror="imgError(this);" src="${image}" class="card-img link-image rounded float-right">
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>`;
+    }
+
+    static textBox(index, entry){
+        const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
+        const link = entry.url ?
+            `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
+            '';
+        const image = entry.image ?
+            `<img onerror="imgError(this);" class="tBox-image rounded" src=${entry.image} align="right" />` : 
+            '';
+
+        return `
+        <div class="row mb-1">
+            <div class="col-auto">
+                ${edit}
+            </div>
+            <div class="col-11">
+                <div class="card bg-card-grey">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">${entry.title}  ${Component.stars(entry.rating)}</h5>
+                        ${image}
+                        <p class="card-text">${entry.description.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    ${link}
+                </div>
+            </div>
+        </div>`;
+    }
+}
 
 class Entry {
-    // TO DO: Make url a URL object, and make use of those properties
     static idGen = Entry.generateID();
     constructor({id, title, description, image, url, type, rating, sequence}, state){
         this.id = id ? id : Entry.idGen.next().value;
         this.title = title;
-        this.description = description;
+        this.description = description ? description : '';
         this.image= image;
         this.url = url;
         this.type = type;
-        this.rating = rating;
+        this.rating = rating ? rating: 0;
         this.sequence = sequence;
         this.state = state;
     }
@@ -29,7 +119,7 @@ class Entry {
     }
 
    static toJSON({id, title, description, image, url, type, rating, sequence}){
-        return {id, title, description, image, url, type, rating, sequence};
+        return {id, title, description, image, url, type, rating : +rating, sequence : +sequence};
     }
 
     updateWithMetaData(metaData){
@@ -44,49 +134,15 @@ class Entry {
     }
 
     generateMarkup(index){
-        // TO DO: markup styling
-        // TO DO: no anchor tag if this.url is null
-        const img = this.image ? this.image : NOIMG;
-        let markup = '';
         switch (this.type){
             case 'link':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
-                }
-                markup = markup + `
-                <img src="${img}" onerror="imgError(this);" width=50 height=50>
-                <a href="${this.url}">${this.title}</a>
-                </div>`;
-                break;
+                return Component.linkCard(index, this);
             case 'divider':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
-                }
-                markup = markup + `
-                <hr>
-                </div>`;
-                break;
+                return Component.divider(index, this);
             case 'text_box':
-                markup = '<div>';
-                if (viewState === AUTH.edit){
-                    markup = markup + `
-                    <button id="delete_${index}">X</button>
-                    <button id="edit_${index}">Edit</button>`;
-                }
-                markup = markup + `
-                    <p><b>${this.title}</b> <br>
-                    ${this.description}
-                    </p>
-                </div>`;
-                break;  
+                return Component.textBox(index, this);
         }
-        return markup;
+        throw(`Entry ${this} has invalid type ${this.type}`)
     }
     
 }
@@ -98,6 +154,7 @@ class Repo {
         this.accessKey = access_key;
         this.isPrivate = is_private;
         this.entries = [];
+        this.deleted = [];
         for (let entry of entries){
             this.entries.push(
                 new Entry(entry, "ORIGINAL")
@@ -121,25 +178,23 @@ class Repo {
 
     }
     refreshEntryList(){
-        const entriesList = document.getElementById('repo-entry-list');
+        const entriesList = document.getElementById('repo-entries');
         entriesList.innerHTML = '';
 
         this.entries.forEach(
             (entry, index) => {
-                if (entry.state != 'DELETE' && entry.state != '_DELETED'){ // Don't render entries marked for deletion
-                    const li = document.createElement('li');
-                    li.id = `entry_${index}`;
-                    li.innerHTML = entry.generateMarkup(index);
-                    entriesList.append(li);
-                }
+                const div = document.createElement('div');
+                div.id = `entry_${index}`;
+                div.innerHTML = entry.generateMarkup(index);
+                entriesList.append(div);
             }
         );
     }
 
     refreshEntryMarkup(entryIndex){
-        const entryLI = document.getElementById(`entry_${entryIndex}`);
+        const entryDiv = document.getElementById(`entry_${entryIndex}`);
         const entry = this.entries[entryIndex];
-        entryLI.innerHTML = entry.generateMarkup(entryIndex);
+        entryDiv.innerHTML = entry.generateMarkup(entryIndex);
     }
 
     addDivider(){
@@ -187,12 +242,44 @@ class Repo {
         if (entry.state == 'NEW'){
             this.entries.splice(entryIndex, 1);
         } else {
-            entry.state = 'DELETE';
+            this.deleted.push(entry.id);
+            this.entries.splice(entryIndex, 1);
         }
+        this.resyncSequence();
         this.refreshEntryList();
     }
 
-    commitRepoChanges(){
+    shiftEntry(idx, dir){
+        // Shift the position of this.entries[idx] by direction (e.g. +1, -1, +2)
+        const elem = this.entries[idx];
+        const len = this.entries.length;
+
+        this.entries.splice(idx, 1);
+        
+        // Wrap-around if moving upwards from 0, or downwards from length-1
+        if ((Math.abs(dir) != dir) && (idx === 0)){
+            this.entries.splice((len+dir), 0, elem);
+        } else {
+            this.entries.splice((idx+dir) % len, 0, elem);
+        }
+        // [this.entries[eOneIdx], this.entries[eTwoIdx]] = [this.entries[eTwoIdx], this.entries[eOneIdx]];
+        
+        this.resyncSequence();
+        this.refreshEntryList();
+    }
+
+    // Iterates through all entries in repo and sets their sequence to their index in this.entries
+    resyncSequence(){
+        for (let idx in this.entries){
+            const entry = this.entries[idx];
+            if (entry.sequence != idx){
+                entry.sequence = idx;
+                entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE';
+            }
+        }
+    }
+
+    async commitRepoChanges(){
         const form = document.getElementById('repo-edit-form');
         this.title = form.repoTitle.value;
         this.description = form.repoDesc.value;
@@ -202,10 +289,18 @@ class Repo {
             description: this.description,
             is_private : this.isPrivate
         }
-
-        axios.patch(`/api/repo/${this.accessKey}`, data);
-        this.displayRepoInfo();
-        document.getElementById('repo-edit-div').hidden = true;
+        const repo = this;
+        await axios.patch(`/api/repo/${this.accessKey}`, data)
+        .then( function(response){
+            if (response.status === 200){
+                flash('Changes saved.', 'success');
+                repo.displayRepoInfo();
+            }
+        })
+        .catch( function(error){
+            flash('Something went wrong. Please try again later.', 'danger');
+            console.error(error);
+        });
     }
 
     async commitEntryChanges(){
@@ -214,7 +309,7 @@ class Repo {
         // array[1] = references to Entry objects
         const toAdd = [[], []];
         const toChange = [[], []];
-        const toDelete = [[], []];
+        const toDelete = this.deleted;
         for (let entry of this.entries){
             switch (entry.state){
                 case 'NEW':
@@ -224,10 +319,6 @@ class Repo {
                 case 'CHANGE':
                     toChange[0].push(Entry.toJSON(entry));
                     toChange[1].push(entry);
-                    break;
-                case 'DELETE':
-                    toDelete[0].push(entry.id);
-                    toDelete[1].push(entry);
                     break;
             }
         }
@@ -250,34 +341,39 @@ class Repo {
                 }
             }
 
-            if (toDelete[0].length > 0){
-                await axios.delete(endPoint, {data: {'delete' : toDelete[0]}});
+            if (toDelete.length > 0){
+                await axios.delete(endPoint, {data: {'delete' : toDelete}});
                 changes=true;
-                for (let entry of toDelete[1]){
-                    entry.state = '_DELETED';
-                }
+                this.deleted = [];
             }
             
             if (changes){
-                flash('Changes saved.');
+                flash('Changes saved.', 'success');
             }
             else{
-                flash('Repo up to date.');
+                flash('Repo up to date.', 'info');
             }
-
         } catch (err) {
             throw `Could not save changes. Error msg: ${err}`;
         }
     }
 }
-let flashTimer
-function flash(message){
-    clearInterval(flashTimer);
+let opacityTimer, messageTimer;
+function flash(message, category){
+    clearInterval(opacityTimer);
+    clearInterval(messageTimer);
     const flashDiv = document.getElementById('flashes');
-    flashDiv.innerHTML = `<p>${message}</p>`;
-    flashTimer = setTimeout(()=>{
-        flashDiv.innerHTML = '';
+    flashDiv.classList.add(`alert-${category}`, 'fade-in');
+    flashDiv.classList.remove('fade-out');
+    flashDiv.innerText = message;
+    opacityTimer = setTimeout(()=>{
+        flashDiv.classList.remove('fade-in');
+        flashDiv.classList.add('fade-out');
     }, 2000);
+    messageTimer = setTimeout(() =>{
+        flashDiv.classList.remove(`alert-${category}`);
+        flashDiv.innerHTML = '<span>&#8203;</span>';
+    }, 3100);
 }
 
 // Replace broken link thumbnails with generic globe image
@@ -287,14 +383,36 @@ function imgError(image){
     return true;
 }
 
+function alertSave(clear=false){    
+    const btn = document.getElementById('btn-save-changes');
+    if (clear){
+        btn.classList.remove('btn-outline-warning');
+        btn.classList.add('btn-outline-success');
+    } else {
+        btn.classList.remove('btn-outline-success');
+        btn.classList.add('btn-outline-warning');
+    }
+}
+
+// Toggles the display of the fullscreen loading spinner, to be called on load in while waiting for AJAX response
+function toggleLoading(){
+    const loadDiv = document.getElementById('loading');
+    const on = (loadDiv.style.display === 'block');
+    loadDiv.style.display = on ? 'none' : 'block';
+}
+
 async function loadRepoData(accessKey){
+    toggleLoading();
     let res
     try {
+        
         res = await axios.get(`/api/repo/${accessKey}`);
     } catch (err) {
         if (err.response.status === 401 || err.response.status === 403) {
             // Redirect on unauthorized
             window.location = `/repo/auth?access_key=${accessKey}`; 
+        } else {
+            flash('Critical Error: Could not load repository data.', 'danger');
         }
     }
     
@@ -306,13 +424,15 @@ async function loadRepoData(accessKey){
         // Only bother with setting up editing listeners if we're authorized to edit
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
+            modalCloseHandlers();
         } else {
             // Always set up the control div handler, so user can click edit button to bring up auth
-            document.getElementById('controls').addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
+            document.getElementById('controls').addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
         }
+        
     }
+    toggleLoading();
 }
-
 function initEditEventListeners(repo){
     const controls = document.getElementById('controls');
     const entryList = document.getElementById('repo-entries');
@@ -320,67 +440,117 @@ function initEditEventListeners(repo){
     const newLinkForm = document.getElementById('new-link-form');
     const repoEditForm = document.getElementById('repo-edit-form');
     const repoDeleteForm = document.getElementById('repo-delete-form');
+    const entryDeleteBtn = document.getElementById('btn-entry-delete');
 
-    controls.addEventListener('click', (evt) => {controlEventHandler(evt, repo)});
-    entryList.addEventListener('click', (evt) => {entriesEventHandler(evt, repo)});
+    controls.addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
+    entryList.addEventListener('click', (evt) => {entriesClickHandler(evt, repo)});
+    entryDeleteBtn.addEventListener('click', (evt) => {entryDeleteHandler(evt, repo)});
     entryEditForm.addEventListener('submit', (evt) => {entryEditSubmitHandler(evt, repo)});
     repoDeleteForm.addEventListener('submit', (evt) => {deleteConfirmationHandler(evt, repo)});
     
-    document.getElementById('btn-close-repo-delete').addEventListener('click', () => {
-        document.getElementById('repo-delete-div').hidden = true});
-    
     newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        const link = newLinkForm.new.value;
-        repo.addLink(link);
-        newLinkForm.new.value = '';
-        window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+        const links = newLinkForm.new.value;
+        if (links){
+            for (let link of links.split('\n')){
+                repo.addLink(link);
+            }
+            alertSave();
+            newLinkForm.new.value = '';
+        }
     });
 
     repoEditForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        try{
-            repo.commitRepoChanges();
-            flash('Changes saved.');
-        } catch {
-            flash('Something went wrong. Please try again later.');
-        }
+        repo.commitRepoChanges();
+        document.getElementById('repo-edit-div').style.display = 'none';
     });
 }
 
-function unSavedChangesHandler(evt){
-    evt.preventDefault();
-    return evt.returnValue = 'Are you sure you want to exit? This repo has unsaved changes.';
+function modalCloseHandlers(){
+    const repoModal = document.getElementById('repo-edit-div');
+    const deleteModal = document.getElementById('repo-delete-div');
+    const entryModal = document.getElementById('entry-edit-div');
+    const helpModal = document.getElementById('help-modal');
+
+    repoModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-repo-modal':
+                repoModal.style.display = 'none';
+                break;
+            case 'repo-edit-div':
+                repoModal.style.display = 'none';
+                break;
+        }
+    });
+
+    deleteModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'btn-close-repo-delete':
+                deleteModal.style.display = 'none';
+                break;
+            case 'repo-delete-div':
+                deleteModal.style.display = 'none';
+                break;
+        }
+    });
+
+    entryModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-entry-modal':
+                entryModal.style.display = 'none';
+                break;
+            case 'entry-edit-div':
+                entryModal.style.display = 'none';
+                break;
+        }
+    });
+
+    helpModal.addEventListener('click', function(evt){
+        switch(evt.target.id){
+            case 'close-help-modal':
+                helpModal.style.display = 'none';
+                break;
+            case 'help-modal':
+                helpModal.style.display = 'none';
+                break;
+        }
+    })
+
 }
+
 // Event handler for the control panel
-function controlEventHandler(evt, repo){
-    switch (evt.target.id){
+function controlClickHandler(evt, repo){
+    const id = evt.target.classList.contains('bi') ? evt.target.parentNode.id : evt.target.id;
+    switch (id){
         case 'btn-new-divide':
             repo.addDivider();
-            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            alertSave();
+            break;
+        case "help-btn":
+            document.getElementById('help-modal').style.display = 'block';
             break;
         case 'btn-new-tbox':
             repo.addTextBox();
-            window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+            alertSave();
             break;
         case 'btn-save-changes':
             try{
                 repo.commitEntryChanges();
-                window.removeEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+                alertSave(clear=true);
             } catch {
-                flash("Something went wrong. Please try again later.")
+                flash("Something went wrong. Please try again later.", 'danger')
             }
             break;
         case 'btn-edit-repo':
-            const div = document.getElementById('repo-edit-div')
-            div.hidden = !div.hidden;
-            if (div.hidden == false ) loadRepoIntoEditForm(repo);
+            document.getElementById('repo-edit-div').style.display = 'block';
+            loadRepoIntoEditForm(repo);
             break;
         case 'btn-auth-repo':
             window.location =`/repo/auth?access_key=${repo.accessKey}`; 
             break;
         case "btn-delete-repo":
-            document.getElementById('repo-delete-div').hidden = false;
+            document.getElementById('repo-delete-div').style.display = 'block';
             break;
     }
 }
@@ -393,22 +563,36 @@ async function deleteConfirmationHandler(evt, repo){
         if (response.status === 200) window.location = '/';
     })
     .catch( function(){
-        document.getElementById('repo-delete-response').innerText = 'Incorrect pass phrase';
+        document.getElementById('repo-delete-response').innerText = 'Incorrect password';
         evt.target.pass_phrase.value = '';
         }
     );
 }
 
-function entriesEventHandler(evt, repo){
+function entriesClickHandler(evt, repo){
     const [method, entryIndex] = evt.target.id.split('_');
     switch (method){
         case 'edit':
+            // Delete entry if CTRL is held
+            if (evt.ctrlKey){
+                repo.deleteEntry(entryIndex);
+                alertSave();
             // Toggle visibility of Entry Editing Form
-            document.getElementById('entry-edit-div').hidden = false;
-            loadEntryIntoEditForm(repo, entryIndex);
+            } else {
+                document.getElementById('entry-edit-div').style.display = 'block';
+                loadEntryIntoEditForm(repo, +entryIndex);
+            }
             break;
-        case 'delete':
-            repo.deleteEntry(entryIndex);
+        // Sequence shifting
+        case 'up':
+            console.log('click up', entryIndex);
+            repo.shiftEntry(+entryIndex, -1);
+            alertSave();
+            break;
+        case 'down':
+            console.log('click down', entryIndex);
+            repo.shiftEntry(+entryIndex, +1);
+            alertSave();
             break;
     }
 }
@@ -423,7 +607,8 @@ function entryEditSubmitHandler(evt, repo){
     entry.description = entryEditForm.entryDesc.value;
     entry.url = entryEditForm.entryURL.value;
     entry.type = entryEditForm.entryType.value;
-    entry.image = entryEditForm.entryImage.value ? entryEditForm.entryImage.value : NOIMG;
+    entry.image = entryEditForm.entryImage.value;
+    entry.rating = entryEditForm.entryRating.value;
     entry.state = entry.state === 'NEW' ? 'NEW' : 'CHANGE'
     // Clear and hide form, update DOM
     entryEditForm.entryTitle.value = '';
@@ -431,9 +616,18 @@ function entryEditSubmitHandler(evt, repo){
     entryEditForm.entryURL.value = '';
     entryEditForm.entryType.value = '';
     entryEditForm.entryImage.value = '';
-    document.getElementById('entry-edit-div').hidden = true;
-    window.addEventListener("beforeunload", unSavedChangesHandler, {capture: true});
+    entryEditForm.entryRating.value = 0;
+    document.getElementById('entry-edit-div').style.display = 'none';
+    alertSave();
     repo.refreshEntryMarkup(entryIndex);
+}
+
+function entryDeleteHandler(evt, repo){
+    const form = document.getElementById('entry-edit-form');
+    const entryIndex = form.getAttribute('data-entryIndex');
+    repo.deleteEntry(entryIndex);
+    alertSave();
+    document.getElementById('entry-edit-div').style.display = 'none';
 }
 
 function loadRepoIntoEditForm(repo){
@@ -452,6 +646,7 @@ function loadEntryIntoEditForm(repo, entryIndex){
     form.entryURL.value = entry.url;
     form.entryType.value = entry.type;
     form.entryImage.value = entry.image === NOIMG ? '' : entry.image;
+    form.entryRating.value = entry.rating;
     form.setAttribute('data-entryIndex', entryIndex);
 }
 

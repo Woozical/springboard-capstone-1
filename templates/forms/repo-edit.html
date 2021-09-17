@@ -1,0 +1,36 @@
+<form class="modal-form" id="repo-edit-form">
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h5>Edit Repository Info</h5>
+        </div>
+        <div class="col">
+            <span class="close"><i id="close-repo-modal" class="bi bi-x-lg"></i></span>
+        </div>
+    </div>
+    <hr>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="repo-title-input">Title</label>
+        <div class="col-sm-10">
+            <input class="form-control" maxlength="50" type="text" id="repo-title-input" name="repoTitle">
+        </div>
+    </div>
+    <br>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label" for="repo-desc-input">Description</label>
+        <div class="col-sm-10">
+            <input class="form-control" type="text" id="repo-desc-input" name="repoDesc">
+        </div>
+    </div>
+    <br>
+    <div class="form-group row">
+        <div class="col-sm-2">Private Repo</div>
+        <div class="col-sm-8">
+            <input class="form-check-input" type="checkbox" id="repo-privacy-input" name="repoPrivacy">
+            <label class="form-check-label" for="repo-privacy-input">Yes/No</label>
+        </div>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-success btn-lg">Save</button> 
+    </div>
+</form>

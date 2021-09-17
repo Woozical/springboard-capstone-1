@@ -6,94 +6,121 @@ Untitled Repo
 
 {% block content %}
 <!-- To Do: WTForms for forms? -->
-<div id="flashes">
-</div>
-<div id="controls">
-    {% if session['working_repo'] == repo.access_key %}
-    <form id="new-link-form" action="">
-        <input type="text" id="input-url" name="new">
-    </form>
-    <button id="btn-new-divide">Add Divider</button>
-    <button id="btn-new-tbox">Add TextBox</button>
-    <button id="btn-save-changes">Save Changes</button>
-    <button id="btn-edit-repo">Edit Repo Info</button>
-    <button id="btn-delete-repo">Delete Repo</button>
-    {% else %}
-    <button id="btn-auth-repo">Edit</button>
-    {% endif %}
-</div>
-{% if session['working_repo'] == repo.access_key %}
-<!-- To Do: Make forms modals -->
-<div id="repo-delete-div" hidden>
-    <button id="btn-close-repo-delete">X</button>
-    <form id="repo-delete-form">
-        Are you sure you want to delete this repository?
-        This action is not reversable.
-        <p id='repo-delete-response'></p>
-        <label for="repo-delete-pw">Enter pass phrase to confirm:</label>
-        <input type="password" id="repo-delete-pw" name="pass_phrase">
-        <button>Confirm</button>
-    </form>
-</div>
-<div id="repo-edit-div" hidden>
-    <form id="repo-edit-form">
-        <label for="repo-title-input">Title</label>
-        <input type="text" id="repo-title-input" name="repoTitle">
-        <label for="repo-desc-input">Description</label>
-        <input type="text" id="repo-desc-input" name="repoDesc">
-        <label for="repo-privacy-input">Private Repo</label>
-        
-        <input type="checkbox"
-        id="repo-privacy-input"
-        name="repoPrivacy"
-        {% if repo.is_private %}
-        checked
-        {% endif %}
-        >
-        <button>Save</button>
-    </form>
-</div>
-{% endif %}
-<div id="content">
-    <h1 id="repo-title"></h1>
-    <p id="repo-desc"></p>
-    <div id="repo-entries">
-        <ul id='repo-entry-list'></ul>
+<!-- To Do: Noscript version -->
+<div class="container-fluid mt-2">
+    <div class="row justify-content-around">
+        <div class="col-9 bg-dark-grey border border-dark" id="content">
+            <div id="repo-info" class="bg-header-grey">
+                <h1 class="display-6 text-light" id="repo-title">{{repo.title}}</h1>
+                <p class="text-dim-light" id="repo-desc">{{repo.description}}</p>
+            </div>
+            <br>
+            <div class="text-dim-light" id="repo-entries">
+                <noscript>
+                    <div class="alert alert-warning">Javascript is required to use this website.</div>
+                </noscript>
+            </div>
+        </div>
+
+            {% if session['working_repo'] == repo.access_key %}
+            <div class="col-auto text-center">
+                <div id="controls" class="border border-dark glass-black">
+                <div class="row">
+                    <h4 class="text-light fw-light">Controls</h4>
+                    <small id="help-btn" class="text-muted tip">(Help)</small>
+                </div>
+                <hr class="text-light">
+                <div class="row justify-content-center">
+                    <div class="col-11">
+                        <form id="new-link-form" action="">
+                            <textarea name="new" class="form-control" id="input-url" cols=36 rows="4" placeholder="Paste links here..."></textarea>
+                        </form>
+                    </div>
+                </div>
+                <br>
+                <div class="row justify-content-md-center">
+                    <div class="col-12">
+                        <button title="Create Text Box" class="btn btn-lg btn-primary" id="btn-new-tbox"><i class="bi bi-blockquote-right"></i></button>
+                        <button title="Add Links" form="new-link-form" class="btn btn-wide btn-lg btn-primary">
+                            <i class="bi bi-link"></i>
+                        </button>
+                        <button title="Create Divider" class="btn btn-lg btn-primary" id="btn-new-divide"><i class="bi bi-hr"></i></button>
+                    </div>
+                </div>
+                <hr class="text-light">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <button title="Save Changes" class="btn btn-outline-success" id="btn-save-changes"><i class="bi bi-save2"></i></button>
+                        <button title="Edit Repository Information" class="btn btn-outline-info" id="btn-edit-repo">
+                            <i class="bi bi-gear"></i>
+                        </button>
+                        <button title="Delete Repository" class="btn btn-outline-danger" id="btn-delete-repo"><i class="bi bi-trash"></i></button>
+                        <a href="/" title="Return to Home Page" class="btn btn-outline-primary">
+                            <i class="bi bi-house-door"></i>
+                        </a>
+                    </div>
+                </div>
+                <br>
+                {% else %}
+                <div class="col-2 text-center">
+                    <div id="controls" class="border border-dark glass-black">
+                        <div class="row">
+                            <div class="col-12">
+                                <h4 class="text-light fw-light">Controls</h4>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-auto">
+                                <button class="btn btn-lg btn-primary" id="btn-auth-repo">Edit</button>
+                            </div>
+                        </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="text-center alert" id="flashes"><span>&#8203;</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
+    <!-- Modals -->
+    <div class="modal" role="status" id="loading">
+        <div class="text-center">
+            <div class="text-white spinner-border spin-center" style="width: 5rem; height: 5rem;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="help-modal">
+        {% include 'docs/help.html' %}
+    </div>
+    {% if session['working_repo'] == repo.access_key %}
+    <div class="modal" role="dialog" id="repo-delete-div">
+        {% include 'forms/repo-delete.html' %}
+    </div>
+    <div class="modal" role="form" id="repo-edit-div">
+        {% include 'forms/repo-edit.html' %}
+    </div>
+    <div class="modal" id="entry-edit-div">
+        {% include 'forms/entry-edit.html' %}
+    </div>
+    {% endif %}
+    <!--  -->
 </div>
-{% if session['working_repo'] == repo.access_key %}
-<div id="entry-edit-div" hidden>
-    <form id="entry-edit-form">
-        <label for="entry-title-input">Title</label>
-        <input type="text" id="entry-title-input" name="entryTitle">
-        <label for="entry-desc-input">Description</label>
-        <input type="text" id="entry-desc-input" name="entryDesc">
-        <label for="entry-image-input">Image Preview</label>
-        <input type="text" id="entry-image-input" name="entryImage">
-        <label for="entry-url">URL</label>
-        <input type="text" id="entry-url-input" name="entryURL">
-        <label for="entry-type-input">Type</label>
-        <select id="entry-type-input" name="entryType">
-            <option value="link">Link</option>
-            <option value="divider">Divider</option>
-            <option value="text_box">Text Box</option>
-        </select>
-        <button>Done</button>
-    </form>
-</div>
-{% endif %}
+
 {% endblock %}
 
 {% block script %}
 <script src="/static/app.js"></script>
-{% if session.get('working_repo') == repo.access_key %}
+{% if session.get('working_repo') == repo.access_key %} 
     <script>
-        let viewState = 1;
+        const viewState = 1;
         loadRepoData('{{repo.access_key}}');
     </script>
 {% else %}
     <script>
-        let viewState = 0;
+        const viewState = 0;
         loadRepoData('{{repo.access_key}}');
     </script>
 {% endif %}

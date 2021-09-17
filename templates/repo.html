@@ -71,7 +71,7 @@ Untitled Repo
                         </div>
                         <div class="row justify-content-center">
                             <div class="col-auto">
-                                <button class="btn btn-lg btn-primary" id="btn-auth-repo">Edit</button>
+                                <a href="/repo/auth?access_key={{repo.access_key}}" class="btn btn-lg btn-primary" id="btn-auth-repo">Edit</a>
                             </div>
                         </div>
                 {% endif %}
@@ -112,7 +112,7 @@ Untitled Repo
 {% endblock %}
 
 {% block script %}
-<script src="/static/app.js"></script>
+<script src="/static/js/app.js"></script>
 {% if session.get('working_repo') == repo.access_key %} 
     <script>
         const viewState = 1;

@@ -425,11 +425,7 @@ async function loadRepoData(accessKey){
         if (viewState === AUTH.edit){
             initEditEventListeners(repo);
             modalCloseHandlers();
-        } else {
-            // Always set up the control div handler, so user can click edit button to bring up auth
-            document.getElementById('controls').addEventListener('click', (evt) => {controlClickHandler(evt, repo)});
         }
-        
     }
     toggleLoading();
 }
@@ -545,9 +541,6 @@ function controlClickHandler(evt, repo){
         case 'btn-edit-repo':
             document.getElementById('repo-edit-div').style.display = 'block';
             loadRepoIntoEditForm(repo);
-            break;
-        case 'btn-auth-repo':
-            window.location =`/repo/auth?access_key=${repo.accessKey}`; 
             break;
         case "btn-delete-repo":
             document.getElementById('repo-delete-div').style.display = 'block';

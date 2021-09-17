@@ -26,6 +26,10 @@ def before_request_func():
     if 'SameSite' not in session:
         session['SameSite'] = 'Strict'
 
+@app.errorhandler(404)
+def not_found_view(e):
+    return render_template('not-found.html')
+
 ## Front-end Layer
 @app.route('/')
 def home_view():
@@ -72,36 +76,8 @@ def repo_auth():
         else:
             flash('Wrong password')
         
-    return render_template('/forms/auth-repo.html', form=form)
+    return render_template('auth.html', form=form)
 
-## DEPREC? ##
-@app.route('/repo/create', methods=['POST'])
-def repo_create():
-    form = NewRepoForm()
-    if form.validate_on_submit():
-        # On the miniscule chance we generate a non-unique access key, loop and try again.
-        success = False
-        while not success:
-            new_repo = Repo.create(
-                pass_phrase = form.pass_phrase.data,
-                title = form.title.data,
-                description = form.description.data,
-                is_private = form.is_private.data
-            )
-            db.session.add(new_repo)
-            try:
-                db.session.commit()
-                success = True
-            except:
-                success = False
-        session['working_repo'] = new_repo.access_key
-        return redirect(
-            url_for('repo_view', access_key=new_repo.access_key)
-        )
-    else:
-        return redirect(url_for('home_view'))
-
-# To Do: 404 page
 
 ### API Layer ###
 

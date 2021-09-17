@@ -16,4 +16,4 @@ class NewRepoForm(FlaskForm):
         return errors
 
 class AuthRepoForm(FlaskForm):
-    pass_phrase = PasswordField('Please enter the password.', validators=[InputRequired()])
+    pass_phrase = PasswordField('Please enter the repository\'s password.', validators=[InputRequired()])

@@ -17,7 +17,7 @@ def get_tags(url:str):
     if not pr.scheme :
         p_url = "http://" + p_url
     elif pr.scheme != 'http' and pr.scheme != 'https':
-        tags = {'title' : pr.netloc} if pr.netloc else {'title': p_url}
+        return {'title' : pr.netloc} if pr.netloc else {'title': p_url}
 
     try:
         res = requests.get(p_url)

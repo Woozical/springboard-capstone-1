@@ -1,12 +1,23 @@
 {% extends 'base.html' %}
 
+{% block og %}
+    {% if repo.title %}
+    <meta property="og:title" content="LinkBin - {{repo.title}}">
+    {% else %}
+    <meta property="og:title" content="LinkBin - {{repo.access_key}}">
+    {% endif %}
+    {% if repo.description %}
+    <meta property="og:description" content="{{repo.description}}">
+    {% else %}
+    <meta property="og:description" content="Save and share your links with style.">
+    {% endif %}
+{% endblock %}
+
 {% block title %}
 Untitled Repo
 {% endblock %}
 
 {% block content %}
-<!-- To Do: WTForms for forms? -->
-<!-- To Do: Noscript version -->
 <div class="container-fluid mt-2">
     <div class="row justify-content-around">
         <div class="col-9 bg-dark-grey border border-dark" id="content">

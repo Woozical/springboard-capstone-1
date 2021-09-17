@@ -1,15 +1,23 @@
 import requests
 from urllib.parse import unquote, urlparse
 from requests.exceptions import ConnectionError
+from keys import TOKEN
+
+def opengraphIO_scrape(url:str):
+    print('Performing OpenGraph.io request')
+    endpoint = f'https://opengraph.io/api/1.1/site/{url}'
+    response = requests.get(endpoint, params={'app_id' : TOKEN}).json()
+    return response['hybridGraph']
 
 def get_tags(url:str):
     p_url = unquote(url)
     pr = urlparse(p_url)
+    tags = {}
     # Missing/incorrect schema
     if not pr.scheme :
         p_url = "http://" + p_url
     elif pr.scheme != 'http' and pr.scheme != 'https':
-        return {'title' : pr.netloc} if pr.netloc else {'title': p_url}
+        tags = {'title' : pr.netloc} if pr.netloc else {'title': p_url}
 
     try:
         res = requests.get(p_url)
@@ -17,15 +25,30 @@ def get_tags(url:str):
             if res.headers['content-type'] in {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}:
                 return {'title' : p_url, 'image' : p_url, 'url' : p_url}
             elif 'text/html' in res.headers['content-type']:
-                return parse_HTML(res.text)
+                tags = parse_HTML(res.text)
             else:
-                return {'title' : p_url}
+                tags = {'title' : p_url}
         else:
             print(f'scrape fail non-200: {url}')
-            return {'url' : p_url}
+            tags = {'url' : p_url}
     except ConnectionError:
         print(f'scrape fail Connection Error: {url}')
-        return {'url' : p_url}
+        tags = {'url' : p_url}
+    
+    if ('title' not in tags) or ('description' not in tags) or ('image' not in tags) or ('url' not in tags):
+        try:
+            og_tags = opengraphIO_scrape(url)
+            tags['title'] = og_tags['title']
+            tags['description'] = og_tags['description']
+            tags['image'] = og_tags['image']
+            tags['site_name'] = og_tags['site_name']
+            tags['url'] = og_tags['url']
+            return tags
+        except:
+            return tags
+    else:
+        return tags
+
 
 def parse_HTML(content):
     tags = {}

@@ -83,7 +83,6 @@ def repo_auth():
 
 @app.route('/api/scrape')
 def api_scrape_url():
-    # TO-DO: Implement opengraphr API to plug metadata gaps
     if 'working_repo' in session:
         meta_data = get_tags(request.args['url'])
         return jsonify(msg="success", data=meta_data)

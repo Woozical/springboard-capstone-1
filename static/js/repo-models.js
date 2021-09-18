@@ -38,6 +38,7 @@ class Component {
     static linkCard(index, entry){
         const edit = (viewState === AUTH.edit) ? Component.editButtons(index) : '';
         const image = entry.image ? entry.image : NOIMG;
+        const title = entry.url ? `<a href="${entry.url}">${entry.title}</a>` : `${entry.title}`
         return `
         <div class="row mb-1">
         <div class="col-auto">
@@ -48,7 +49,7 @@ class Component {
             <div class="row">
                 <div class="col-10">
                 <div class="card-body">
-                    <h6 class="card-title"><a href="${entry.url}">${entry.title}</a> ${Component.stars(entry.rating)}</h6>
+                    <h6 class="card-title">${title} ${Component.stars(entry.rating)}</h6>
                     <p class="card-text fs-7">${entry.description.replace(/\n/g, '<br>')}
                     </p>
                     <small class="card-text fs-8"><a class="text-muted" href="${entry.url}">${entry.url}</a></small>

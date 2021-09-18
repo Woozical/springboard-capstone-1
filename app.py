@@ -13,7 +13,7 @@ app.config['SECRET_KEY'] = (
 )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URI', 'postgresql:///link-repo')
+    os.environ.get('DATABASE_URL', 'postgresql:///link-repo')
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False

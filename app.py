@@ -1,5 +1,6 @@
 import os
 from flask import Flask, session, render_template, request, redirect, url_for, jsonify, flash
+from sqlalchemy.exc import DataError
 from models import db, connect_db, Repo, Entry
 from forms import AuthRepoForm, NewRepoForm
 from scrape import get_tags
@@ -120,11 +121,17 @@ def api_repo_get(access_key):
     repo = Repo.query.get(access_key)
     if not repo:
         return jsonify(error="Repo not found"), 404
-    if not repo.is_private or ('working_repo' in session and session['working_repo'] == repo.access_key):
+    
+    if repo.is_private and 'working_repo' not in session:
+        return jsonify(error="Unauthorized"), 401
+    elif repo.is_private and session['working_repo'] != repo.access_key:
+        return jsonify(error="Unauthorized"), 403
+    elif repo.is_private and session['working_repo'] == repo.access_key:
         return jsonify(repo.to_json())
     else:
-        return jsonify(error="Unauthorized"), 401
+        return jsonify(repo.to_json())
 
+## DEPREC? ##
 @app.route('/api/repo/auth', methods=['POST'])
 def api_repo_auth():
     data = request.get_json()
@@ -163,7 +170,10 @@ def api_repo_delete(access_key):
     
     db.session.delete(repo)
     db.session.commit()
-    del session['working_repo']
+    # This route should only be front-end accessible if user is authenticated in the session, but we'll check just in case
+    if 'working_repo' in session and session['working_repo'] == access_key:
+        del session['working_repo']
+
     return jsonify(message=f"success. {access_key} deleted."), 200
 
 @app.route('/api/repo/<access_key>', methods=['PATCH'])
@@ -250,8 +260,12 @@ def api_repo_new_entries(access_key):
         return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
     db.session.add_all(new_entries)
-    db.session.commit()
-    return jsonify(msg=f"Success. Created {len(new_entries)} on {access_key}"), 201
+    try:
+        db.session.commit()
+        return jsonify(msg=f"Success. Created {len(new_entries)} on {access_key}"), 201
+    except DataError:
+        db.session.rollback()
+        return jsonify(error="Bad request, check field types and values"), 400
 
 
 @app.route('/api/repo/<access_key>/entries', methods=['PATCH'])
@@ -288,8 +302,12 @@ def api_entries_patch(access_key):
     except KeyError as err:
         return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
-    db.session.commit()
-    return jsonify(msg=f"Success. Updated {len(data['change'])} on {access_key}")
+    try:
+        db.session.commit()
+        return jsonify(msg=f"Success. Updated {len(data['change'])} on {access_key}")
+    except DataError as err:
+        db.session.rollback()
+        return jsonify(error="Bad request, check field types and values"), 400
 
 @app.route('/api/repo/<access_key>/entries', methods=['DELETE'])
 def api_entries_deletion(access_key):
@@ -316,7 +334,7 @@ def api_entries_deletion(access_key):
             
             db.session.delete(entry)
     except KeyError as err:
-        return jsonify(error=err.message), 400
+        return jsonify(error=f"Missing field: {err.args[0]}"), 400
     
     db.session.commit()
     return jsonify(msg=f"Success. Deleted {len(data['delete'])} on {access_key}")

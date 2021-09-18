@@ -3,7 +3,7 @@ from wtforms import StringField, BooleanField, PasswordField
 from wtforms.validators import InputRequired, Length
 
 class NewRepoForm(FlaskForm):
-    title = StringField('Title', validators=[Length(max=100, message="Maximum of 100 characters.")])
+    title = StringField('Title', validators=[Length(max=50, message="Maximum of 50 characters.")])
     description = StringField('Description', validators=[Length(max=300, message="Maximum of 300 characters.")])
     pass_phrase = PasswordField('Password', validators=[InputRequired(), Length(min=3, message='Minimum of 3 characters required.')])
     is_private = BooleanField('Private')

@@ -29,7 +29,7 @@ class Repo(db.Model):
     ## Columns
     access_key = db.Column(db.Text, primary_key=True)
     pass_phrase = db.Column(db.Text, nullable=False)
-    title = db.Column(db.String(100))
+    title = db.Column(db.String(50))
     description = db.Column(db.String(300))
     is_private = db.Column(db.Boolean, nullable=False, default=False)
     last_visited = db.Column(db.Date, nullable=False, default=datetime.now)
@@ -62,7 +62,7 @@ class Repo(db.Model):
             "title" : self.title,
             "description" : self.description,
             "is_private" : self.is_private,
-            "last_visited" : self.last_visited,
+            "last_visited" : str(self.last_visited),
             "entries" : entries
         }
 

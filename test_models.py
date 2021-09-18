@@ -61,8 +61,8 @@ class RepoModelTestCase(TestCase):
             db.session.commit()
         db.session.rollback()
 
-        # title must be < 100 chars
-        new_repo = Repo(access_key="blah", pass_phrase="pw", title=("x" * 101))
+        # title must be < 50 chars
+        new_repo = Repo(access_key="blah", pass_phrase="pw", title=("x" * 51))
         with self.assertRaises(DataError):
             db.session.add(new_repo)
             db.session.commit()
@@ -130,7 +130,7 @@ class RepoModelTestCase(TestCase):
         self.assertEqual(repo.access_key, repo_json['access_key'])
         self.assertEqual(repo.title, repo_json['title'])
         self.assertEqual(repo.description, repo_json['description'])
-        self.assertEqual(repo.last_visited, repo_json['last_visited'])
+        self.assertEqual(str(repo.last_visited), repo_json['last_visited'])
         self.assertEqual(len(repo.entries), len(repo_json['entries']))
 
 class EntryModelTestCase(TestCase):

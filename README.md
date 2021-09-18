@@ -1,7 +1,9 @@
-# LinkBin
+# [LinkBin](https://sec-linkbin.herokuapp.com)
 ## Summary
 
-LinkBin is an open-source web application that serves as a tool to create repositories of links, while also providing aesthetic and organizational features. It was developed as a capstone project for Springboard's software engineering bootcamp. This project was built in Python3 and ECMAScript using the following technologies:
+LinkBin is an open-source web application that serves as a tool to create repositories of links, while also providing aesthetic and organizational features. It was developed as a capstone project for Springboard's software engineering bootcamp. The app is deployed on heroku [here](https://sec-linkbin.herokuapp.com). A demo repository can be found [here](https://sec-linkbin.herokuapp.com/repo/Y84B9xwCQJ).
+
+This project was built in Python3 and ECMAScript using the following technologies:
 
 * Web Framework: [Flask (version 2.0.1)](https://flask.palletsprojects.com/en/2.0.x/)
 * RDBMS: [PostgreSQL](https://www.postgresql.org/)
@@ -14,6 +16,7 @@ LinkBin is an open-source web application that serves as a tool to create reposi
 And the related Flask/Python wrappers for the above tools. The full list of server dependencies can be found in `requirements.txt`.
 
 The application makes use of OpenGraph metadata for styling links. Retrieval of this data is done using a homemade HTML parser and [OpenGraph.io's API](https://www.opengraph.io/) as a backup for when my tool fails. The landing page's animated gradient CSS was generated with the [CSS Gradient Animator](https://www.gradient-animator.com/) tool by Ian Forrest.
+
 
 
 ## Proposal

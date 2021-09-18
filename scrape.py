@@ -4,12 +4,13 @@ from requests.exceptions import ConnectionError
 from keys import TOKEN
 
 def opengraphIO_scrape(url:str):
-    print('Performing OpenGraph.io request')
     endpoint = f'https://opengraph.io/api/1.1/site/{url}'
     response = requests.get(endpoint, params={'app_id' : TOKEN}).json()
     return response['hybridGraph']
 
 def get_tags(url:str):
+    """ Attempts to get the OpenGraph tags of a given URL, using the homebrew request parser. If tags are missing,
+    opengraph.io's API is utilized to plug the gaps."""
     p_url = unquote(url)
     pr = urlparse(p_url)
     tags = {}
@@ -29,10 +30,8 @@ def get_tags(url:str):
             else:
                 tags = {'title' : p_url}
         else:
-            print(f'scrape fail non-200: {url}')
             tags = {'url' : p_url}
     except ConnectionError:
-        print(f'scrape fail Connection Error: {url}')
         tags = {'url' : p_url}
     
     if ('title' not in tags) or ('description' not in tags) or ('image' not in tags) or ('url' not in tags):
@@ -51,6 +50,7 @@ def get_tags(url:str):
 
 
 def parse_HTML(content):
+    """ Parses the text of an HTML document for opengraph tags and returns a dictionary containing each found. """
     tags = {}
     remain = content
     while (remain):

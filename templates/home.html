@@ -43,19 +43,16 @@ LinkBin
                 {% endif %}
             </div>
         </div>
+        
     </div>
     <hr class="text-white">
+    <noscript>
+        <div class="alert alert-warning text-center">This website requires javascript to be enabled.</div>
+    </noscript>
     <div class="glass-white text-left hide-div" id="create-div">
         <h4>Repository Details</h4>
         {% include 'forms/create-repo.html' %}
     </div>
-    <noscript>
-    <div class="glass-white text-left">
-        <h4>New Repository</h4>
-        {% include 'forms/create-repo.html' %}
-    </div>
-    </noscript>
-
 </div>
 <small class="landing-footer glass-black text-center text-white">
     This website makes use of cookies to provide core functionality. By continuing to make use of this website,

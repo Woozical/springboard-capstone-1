@@ -2,9 +2,8 @@ import requests
 from urllib.parse import unquote, urlparse, quote
 from requests.exceptions import ConnectionError
 import os
-from keys import KEY
 
-TOKEN = os.environ.get('OPENGRAPH_API_KEY', KEY)
+TOKEN = os.environ.get('OPENGRAPH_API_KEY', 'KEY')
 
 def opengraphIO_scrape(url:str):
     print(f'OpenGraph API Call: {url}')

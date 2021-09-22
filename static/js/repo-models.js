@@ -70,7 +70,7 @@ class Component {
             `<div class="card-footer"><a href="${entry.url}">${entry.url}</a></div>` :
             '';
         const image = entry.image ?
-            `<img onerror="imgError(this);" class="tBox-image rounded" src=${entry.image} align="right" />` : 
+            `<img class="tBox-image rounded" src=${entry.image} align="right" />` : 
             '';
 
         return `

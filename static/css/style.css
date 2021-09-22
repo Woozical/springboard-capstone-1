@@ -195,6 +195,7 @@ a.link-light{
 
 .edit-icons>.bi:hover{
     color: #cd71ff;
+    cursor: pointer;
 }
 
 /* Animations */

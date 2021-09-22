@@ -1,37 +1,88 @@
 <div class="modal-doc bg-light">
     <span class="close"><i id="close-help-modal" class="bi bi-x-lg"></i></span>
     <h4>How-To LinkBin:</h4>
-    <div></div>
-    <img src="/static/images/help_link_entry.PNG" align="right">
-    <p>
-        Add link URLs to the text area in the control panel, then click the large link button to add them to your repo.
-        You can input multiple URLs at once, just separate them on a new line before clicking the link button.
-        When submitting your links, they will be instantly added to your repository list on the left. We will try to
-        grab some metadata about your URLs and fill out your entries accordingly, but this may take a few seconds.
-    </p>
     <hr>
-    <img src="/static/images/help_other_entry.PNG" align="right">
-    <p>
-        Below the link button are two buttons to add a text box and divider, respectively.
-        Text boxes are useful for providing instructions or for when a link needs a more verbose description.
-        Dividers are useful for separating or categorizing entries.
-        Both text boxes and dividers can be used to link to URLs.
-    </p>
-    <hr>
-    <img src="/static/images/help_repo_controls.PNG" align="right">
-    <p>
-        Changes to your repository are not automatically saved to the server. Whenever you have unsaved changes on your
-        repository, the save button will be yellow. If you make any mistakes, remember that you can always refresh the
-        page without saving your changes first.
-        Next to the save button are buttons to edit your repository's information (i.e. title, description, privacy mode), or to
-        delete your repository entirely.
-    </p>
-    <hr>
-    <img src="/static/images/help_entry_controls.PNG" align="right">
-    <p>
-        Your entries can be re-sorted using the up and down carets to the left of each entry.
-        Each entry's information can be edited by clicking on the gear icon.
-        Here you can manually set an entry's image preview, or give it a rating to denote its importance.<br>
-        You can quickly remove entries from your repository by holding down the CONTROL key while clicking on the gear icon. <br>
-    </p>
+    <div class="card mb-3" style="max-width: 100%;">
+        <div class="row g-0">
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Links</h5>
+              <p class="card-text">Add link URLs to the text area in the control panel, then click the large link button to add them to your repo.
+                You can input multiple URLs at once, just separate them on a new line before clicking the link button.
+                When submitting your links, they will be instantly added to your repository list on the left. We will try to
+                grab some metadata about your URLs and fill out your entries accordingly, but this may take a few seconds.
+            </p>
+                <p class="card-text"><small class="text-muted">
+                    <i>Make sure your links include the HTTP schema! (http:// or https://)</i>
+                </small></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <img src="/static/images/help_link_entry.PNG" class="img-fluid" alt="link_entry">
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="card mb-3" style="max-width: 100%;">
+        <div class="row g-0">
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Text Boxes and Dividers</h5>
+              <p class="card-text">To the left and right of the link button are two buttons to add text boxes and dividers.
+                Dividers are useful for separating your links and text boxes into different categories (e.g. Social Media, Downloads).
+                Text boxes are useful for providing instructions or for when a link or category needs a more verbose description.
+                A text box may also include an image, just provide a link to the image in the Image field when editing the entry.
+            </p>
+              <p class="card-text"><small class="text-muted">
+                  <i>Both text boxes and dividers can be used to link to URLs.</i>
+                </small></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <img src="/static/images/help_other_entry.PNG" class="img-fluid" alt="other_entry.PNG">
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="card mb-3" style="max-width: 100%;">
+        <div class="row g-0">
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Repo Controls</h5>
+              <p class="card-text">Changes to your repository are not automatically saved to the server.
+                  Whenever you have unsaved changes on your repository, the save button will be yellow. 
+                  If you make any mistakes, remember that you can always refresh the page without saving your changes first.
+                  Next to the save button are buttons to edit your repository's information (i.e. title, description, privacy mode), 
+                  or delete your repository entirely, and return to the home page.
+            </p>
+              <p class="card-text"><small class="text-muted">
+                  <i>Always check to see if you have unsaved changes before navigating away!</i>
+                </small></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <img src="/static/images/help_repo_controls.PNG" class="img-fluid" alt="repo_controls.PNG">
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="card mb-3" style="max-width: 100%;">
+        <div class="row g-0">
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Entry Controls</h5>
+              <p class="card-text">Your entries can be re-sorted using the up and down carets to the left of each entry.
+                Each entry's information can be edited by clicking on the gear icon to bring up the editing window.
+                Here you can manually set an entry's image preview, or give it a rating to denote its importance.
+            </p>
+              <p class="card-text"><small class="text-muted">
+                  <i>Entries can be quickly deleted by holding CTRL while clicking on the gear icon.</i>
+                </small></p>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <img src="/static/images/help_entry_controls.PNG" class="img-fluid" alt="enry_controls.PNG">
+          </div>
+        </div>
+      </div>
 </div>

@@ -1,16 +1,5 @@
 function app(){
-    const createDiv = document.getElementById('create-div');
-    const createBtn = document.getElementById('create-btn');
     const createForm = document.getElementById('create-form');
-
-    createBtn.hidden = false;
-    
-    function toggleFormVisibility(){
-        createBtn.disabled = true;
-        createDiv.classList.add('show-div');
-    }
-
-    createBtn.addEventListener('click', toggleFormVisibility);
 
     createForm.addEventListener('submit', async function(e){
         e.preventDefault();

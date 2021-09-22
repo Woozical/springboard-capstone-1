@@ -1,7 +1,9 @@
 import requests
 from urllib.parse import unquote, urlparse
 from requests.exceptions import ConnectionError
-from keys import TOKEN
+import os
+
+TOKEN = os.environ.get('OPENGRAPH_API_KEY', 'SECRET_KEY_DEV')
 
 def opengraphIO_scrape(url:str):
     endpoint = f'https://opengraph.io/api/1.1/site/{url}'

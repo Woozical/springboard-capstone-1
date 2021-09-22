@@ -9,7 +9,7 @@ from datetime import timedelta
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = (
-    os.environ.get('FLASK_KEY', 'SECRET_KEY_DEV')
+    os.environ.get('SECRET_KEY', 'SECRET_KEY_DEV')
 )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (

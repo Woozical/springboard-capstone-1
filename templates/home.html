@@ -28,9 +28,6 @@ LinkBin
                     </a></i>
                 {% endif %}
             </div>
-            <div class="col">
-                <button class="btn btn-lg btn-success" id="create-btn" hidden>New Repository</button>   
-            </div>
             <div class="col text-white">      
                 {% if last_viewed %}
                     Last Viewed: <i><a class="link-light" href="/repo/{{last_viewed.access_key}}"}>
@@ -46,16 +43,21 @@ LinkBin
         
     </div>
     <hr class="text-white">
-    <noscript>
-        <div class="alert alert-warning text-center">This website requires javascript to be enabled.</div>
-    </noscript>
-    <div class="glass-white text-left hide-div" id="create-div">
-        <h4>Repository Details</h4>
+    <div class="glass-white text-left" id="create-div">
+        <h4>Create a new Repository</h4>
         {% include 'forms/create-repo.html' %}
     </div>
 </div>
+<div class="landing-footer" style="z-index: 2;">
+    <a href="https://github.com/woozical/springboard-capstone-1">
+        <i class="text-white bi bi-github"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/mark-tilley/">
+        <i class="text-white bi bi-linkedin"></i>
+    </a>
+</div>
 <small class="landing-footer glass-black text-center text-white">
-    This website makes use of cookies to provide core functionality. By continuing to make use of this website,
+    This website utilizes cookies to provide core functionality. By continuing to make use of this website,
     you consent to the storing of cookies on your device.
 </small>
 {% endblock %}

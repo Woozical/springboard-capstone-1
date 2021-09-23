@@ -12,54 +12,64 @@ LinkBin
 {% block content %}
 <div class="landing-gradient"></div>
 <div class="container">
-    <div class="text-center">
-        <h1 class="display-1 text-white">LinkBin</h1>
-        <p class="text-white">Save and share your links with style.</p>
-        <br>
-        <div class="row">
-            <div class="col text-white">
-                {% if last_edited %}
-                    Last Edited: <i><a class="link-light" href="/repo/{{last_edited.access_key}}">
-                    {% if last_edited.title %}
-                        {{last_edited.title}}
-                    {% else %}
-                        {{last_edited.access_key}}
-                    {% endif %}
-                    </a></i>
-                {% endif %}
+    <div class="row">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-1 text-white">LinkBin</h1>
+                <p class="text-white fw-light">Save and share your links with style.</p>
+                <br>
+                <div class="row">
+                    <div class="col text-white fw-light">
+                        {% if last_edited %}
+                            Last Edited: <i><a class="link-light" href="/repo/{{last_edited.access_key}}">
+                            {% if last_edited.title %}
+                                {{last_edited.title}}
+                            {% else %}
+                                {{last_edited.access_key}}
+                            {% endif %}
+                            </a></i>
+                        {% endif %}
+                    </div>
+                    <div class="col text-white fw-light">      
+                        {% if last_viewed %}
+                            Last Viewed: <i><a class="link-light" href="/repo/{{last_viewed.access_key}}"}>
+                            {% if last_viewed.title %}
+                                {{last_viewed.title}}
+                            {% else %}
+                                {{last_viewed.access_key}}
+                            {% endif %}
+                            </a></i>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            <div class="col text-white">      
-                {% if last_viewed %}
-                    Last Viewed: <i><a class="link-light" href="/repo/{{last_viewed.access_key}}"}>
-                    {% if last_viewed.title %}
-                        {{last_viewed.title}}
-                    {% else %}
-                        {{last_viewed.access_key}}
-                    {% endif %}
-                    </a></i>
-                {% endif %}
+            <br>
+            <div class="row">
+                <hr class="text-white">
+            </div>
+            <div class="row">
+                <div class="glass-white text-left" id="create-div">
+                    <h4>Create a new Repository</h4>
+                    {% include 'forms/create-repo.html' %}
+                </div>
             </div>
         </div>
-        
-    </div>
-    <hr class="text-white">
-    <div class="glass-white text-left" id="create-div">
-        <h4>Create a new Repository</h4>
-        {% include 'forms/create-repo.html' %}
     </div>
 </div>
-<div class="landing-footer" style="z-index: 2;">
-    <a href="https://github.com/woozical/springboard-capstone-1">
-        <i class="text-white bi bi-github"></i>
-    </a>
-    <a href="https://www.linkedin.com/in/mark-tilley/">
-        <i class="text-white bi bi-linkedin"></i>
-    </a>
-</div>
-<small class="landing-footer glass-black text-center text-white">
-    This website utilizes cookies to provide core functionality. By continuing to make use of this website,
-    you consent to the storing of cookies on your device.
-</small>
+<footer>
+    <span class="landing-footer footer-icons">
+        <a class="text-white bi bi-github" href="https://github.com/woozical/springboard-capstone-1">
+        </a>
+        <a class="text-white bi bi-linkedin" href="https://www.linkedin.com/in/mark-tilley/">
+        </a>
+    </span>
+    <div class="d-flex flex-row landing-footer justify-content-center glass-black">
+        <small class="text-white text-center">
+            This website utilizes cookies to provide core functionality. By continuing to make use of this website,
+            you consent to the storing of cookies on your device.
+        </small>
+    </div>
+</footer>
 {% endblock %}
 
 {% block script %}

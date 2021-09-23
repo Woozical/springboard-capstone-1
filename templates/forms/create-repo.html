@@ -11,7 +11,7 @@
             {{form.pass_phrase(class="form-control form-control-lg", placeholder="Required")}}
             <input type="checkbox" name="show_pw" id="show-pw-input">
             <label for="show-pw-input">Show</label>
-            <small class="form-text"><i>The password must be entered to edit the repositroy.</i></small>
+            <small class="form-text">The password must be entered to edit the repository.</small>
             <small class="text-danger" id="pass_phrase-errors"> </small>
         </div>
     </div>
@@ -29,7 +29,7 @@
             {{form.is_private(class="form-check-input")}}
             <small class="form-text">
                 The password must be entered to view the repository. <br>
-                Note: This still gives editing access.
+                <i>Note: This still gives editing access.</i>
             </small>
         </div>
     </div>

@@ -42,7 +42,7 @@ a.link-light{
 }
 
 .glass-black{
-    background-color: rgba(0,0,0, 0.15);
+    background-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Entry Styling */
@@ -78,11 +78,32 @@ a.link-light{
     width: 50%;
 }
 
+
 .landing-footer{
     padding: 1%;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     width: 100vw;
+}
+
+@media screen and (max-height: 700px) {
+    .landing-footer{
+        position: absolute;
+        padding: 0%;
+        width: 100vw;
+        bottom:auto;
+    }
+}
+
+.footer-icons{
+    display: inherit;
+    z-index: 2;
+}
+
+@media screen and (max-width: 1200px) {
+    .footer-icons{
+        display: none;
+    }
 }
 
 /* Sizing */
@@ -268,18 +289,4 @@ a.link-light{
     0%{background-position:7% 0%}
     50%{background-position:94% 100%}
     100%{background-position:7% 0%}
-}
-
-/* Testing Classes */
-
-.green{
-    background-color: green;
-}
-
-.red{
-    background-color: red;
-}
-
-.blue{
-    background-color: blue;
 }

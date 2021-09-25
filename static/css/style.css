@@ -88,7 +88,7 @@ a.link-light{
 
 @media screen and (max-height: 700px) {
     .landing-footer{
-        position: absolute;
+        position: static;
         padding: 0%;
         width: 100vw;
         bottom:auto;
@@ -146,14 +146,9 @@ a.link-light{
 }
 
 .landing-gradient{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: -1;
-    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc);
-    background-size: 400% 400%;
+    min-width: 100vw;
+    min-height: 100vh;
+    background: linear-gradient(312deg, #c1121f, #669bbc, #c1121f, #669bbc) 0% 0% / 400% 400%;
 
     -webkit-animation: AnimatedGradient 45s ease infinite;
     -moz-animation: AnimatedGradient 45s ease infinite;

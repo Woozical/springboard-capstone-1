@@ -7,9 +7,12 @@ TOKEN = os.environ.get('OPENGRAPH_API_KEY', 'KEY')
 
 def opengraphIO_scrape(url:str):
     print(f'OpenGraph API Call: {url}')
-    endpoint = f'https://opengraph.io/api/1.1/site/{url}'
-    response = requests.get(endpoint, params={'app_id' : TOKEN}).json()
-    return response['hybridGraph']
+    try:
+        endpoint = f'https://opengraph.io/api/1.1/site/{url}'
+        response = requests.get(endpoint, params={'app_id' : TOKEN}).json()
+        return response['hybridGraph']
+    except:
+        return {}
 
 def incomplete(tags):
     return (('title' not in tags) or ('description' not in tags) or ('image' not in tags) or ('url' not in tags))
@@ -36,13 +39,12 @@ def get_tags(url:str):
             # Make OpenGraph.io API call if we got a good connection but incomplete tags
             if res.status_code == 200 and incomplete(tags):
                 og_tags = opengraphIO_scrape(quote(p_url, safe=''))
-                print(og_tags)
                 tags['title'] = og_tags.get('title', tags.get('title'))
                 tags['description'] = og_tags.get('description', tags.get('description'))
                 tags['image'] = og_tags.get('image', tags.get('image'))
                 tags['site_name'] = og_tags.get('site_name', tags.get('site_name'))
                 tags['url'] = og_tags.get('url', tags.get('url'))
-            return tags
+                return tags
         else:
             return {'title' : p_url}
     except ConnectionError:

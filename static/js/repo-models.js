@@ -149,13 +149,8 @@ class Repo {
         this.description = description;
         this.accessKey = access_key;
         this.isPrivate = is_private;
-        this.entries = [];
+        this.entries = entries.map( (entry) => new Entry(entry, "ORIGINAL"));;
         this.deleted = [];
-        for (let entry of entries){
-            this.entries.push(
-                new Entry(entry, "ORIGINAL")
-            );
-        }
 
         this.sortEntries();
     }
@@ -275,6 +270,13 @@ class Repo {
         }
     }
 
+    // Requests the API for updated entry information, usually called after committing new entries, as to get their IDs
+    async resyncEntries(){
+        const res = await axios.get(`/api/repo/${this.accessKey}`);
+        this.entries = res.data.entries.map( (entry) => new Entry(entry, "ORIGINAL"));
+        this.sortEntries();
+    }
+
     async commitRepoChanges(){
         const form = document.getElementById('repo-edit-form');
         this.title = form.repoTitle.value;
@@ -285,70 +287,46 @@ class Repo {
             description: this.description,
             is_private : this.isPrivate
         }
-        const repo = this;
-        await axios.patch(`/api/repo/${this.accessKey}`, data)
-        .then( function(response){
-            if (response.status === 200){
-                flash('Changes saved.', 'success');
-                repo.displayRepoInfo();
-            }
-        })
-        .catch( function(error){
-            flash('Something went wrong. Please try again later.', 'danger');
-            console.error(error);
-        });
+        try {
+            await axios.patch(`/api/repo/${this.accessKey}`, data);
+        } catch (err) {
+            throw `Could not save changes. Error msg: ${err}`;
+        }
     }
 
     async commitEntryChanges(){
         // parse repo changes and send to server
-        // array[0] = array of json data to send to server
-        // array[1] = references to Entry objects
-        const toAdd = [[], []];
-        const toChange = [[], []];
+        const toAdd = [];
+        const toChange = [];
         const toDelete = this.deleted;
         for (let entry of this.entries){
             switch (entry.state){
                 case 'NEW':
-                    toAdd[0].push(Entry.toJSON(entry));
-                    toAdd[1].push(entry);
+                    toAdd.push(Entry.toJSON(entry));
                     break;
                 case 'CHANGE':
-                    toChange[0].push(Entry.toJSON(entry));
-                    toChange[1].push(entry);
+                    toChange.push(Entry.toJSON(entry));
                     break;
             }
         }
         const endPoint = `/api/repo/${this.accessKey}/entries`;
-        try {
-            let changes = false;
-            if (toAdd[0].length > 0){
-                await axios.post(`${endPoint}/new`, {'new' : toAdd[0]});
-                changes=true;
-                for (let entry of toAdd[1]){
-                    entry.state = 'UPDATED';
-                }
-            }
+        const requests = [];
+        // Send off requests in tandem
+        if (toAdd.length > 0){
+            requests.push(axios.post(endPoint, {'new' : toAdd}));
+        }
+        if (toChange.length > 0){
+            requests.push(axios.patch(endPoint, {'change' : toChange}));
+        }
+        if (toDelete.length > 0){
+            requests.push(axios.delete(endPoint, {data: {'delete' : toDelete}}));
+        }
 
-            if (toChange[0].length > 0){
-                await axios.patch(endPoint, {'change' : toChange[0]});
-                changes=true;
-                for (let entry of toChange[1]){
-                entry.state = 'UPDATED';
-                }
-            }
-
-            if (toDelete.length > 0){
-                await axios.delete(endPoint, {data: {'delete' : toDelete}});
-                changes=true;
-                this.deleted = [];
-            }
-            
-            if (changes){
-                flash('Changes saved.', 'success');
-            }
-            else{
-                flash('Repo up to date.', 'info');
-            }
+        try{
+            await Promise.all(requests);
+            // If successful, resync entry data with server (mainly to get IDs for new entries)
+            this.deleted = [];
+            await this.resyncEntries();
         } catch (err) {
             throw `Could not save changes. Error msg: ${err}`;
         }

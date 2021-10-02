@@ -47,22 +47,10 @@ function toggleLoading(){
 }
 
 /* Kickstarts the application by loading in repository information from the server */
-async function loadRepoData(accessKey){
+function loadRepoData(accessKey){
     toggleLoading();
-    let res
-    try {
-        
-        res = await axios.get(`/api/repo/${accessKey}`);
-    } catch (err) {
-        if (err.response.status === 401 || err.response.status === 403) {
-            // Redirect on unauthorized
-            window.location = `/repo/auth?access_key=${accessKey}`; 
-        } else {
-            flash('Critical Error: Could not load repository data.', 'danger');
-        }
-    }
-    
-    if (res){
+    axios.get(`/api/repo/${accessKey}`)
+    .then((res) => {
         // Load in data from server
         const repo = new Repo(res.data);
         repo.displayRepoInfo();
@@ -72,8 +60,16 @@ async function loadRepoData(accessKey){
             initEditEventListeners(repo);
             modalCloseHandlers();
         }
-    }
-    toggleLoading();
+        toggleLoading();
+    })
+    .catch((err) => {
+        if ((err.response) && (err.response.status === 401 || err.response.status === 403)){
+            // Redirect on unauthorized
+            window.location = `/repo/auth?access_key=${accessKey}`;
+        }
+        flash('Critical Error: Could not load repo data.', 'danger');
+        toggleLoading();
+    });
 }
 /* Sets up event listeners related to all editing controls */
 function initEditEventListeners(repo){
@@ -107,8 +103,19 @@ function initEditEventListeners(repo){
 
     repoEditForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
-        repo.commitRepoChanges();
-        document.getElementById('repo-edit-div').style.display = 'none';
+        toggleLoading();
+        repo.commitRepoChanges()
+        .then( () => {
+            flash('Changes saved.', 'success');
+            repo.displayRepoInfo();
+        })
+        .catch( (err) => {
+            flash('Error. Please try again later.', 'danger');
+        })
+        .then( () => {
+            document.getElementById('repo-edit-div').style.display = 'none';
+            toggleLoading();
+        });
     });
 }
 
@@ -182,12 +189,16 @@ function controlClickHandler(evt, repo){
             alertSave();
             break;
         case 'btn-save-changes':
-            try{
-                repo.commitEntryChanges();
+            repo.commitEntryChanges()
+            .then( () => {
                 alertSave(clear=true);
-            } catch {
-                flash("Something went wrong. Please try again later.", 'danger')
-            }
+                flash('Changes saved.', 'success');
+                repo.refreshEntryList();
+            })
+            .catch( (err) => {
+                console.error(err);
+                flash("Server Error. Please try again later.", 'danger')
+            });
             break;
         case 'btn-edit-repo':
             document.getElementById('repo-edit-div').style.display = 'block';
@@ -200,18 +211,19 @@ function controlClickHandler(evt, repo){
 }
 
 /* Submit handler for the repo delete confirmation form */
-async function deleteConfirmationHandler(evt, repo){
+function deleteConfirmationHandler(evt, repo){
     evt.preventDefault();
+    toggleLoading();
     const pw = evt.target.pass_phrase.value;
-    await axios.delete(`/api/repo/${repo.accessKey}`, {data: {'pass_phrase' : pw}})
-    .then( function(response){
+    axios.delete(`/api/repo/${repo.accessKey}`, {data: {'pass_phrase' : pw}})
+    .then( (response) => {
         if (response.status === 200) window.location = '/';
     })
-    .catch( function(){
+    .catch( (err) => {
         document.getElementById('repo-delete-response').innerText = 'Incorrect password';
         evt.target.pass_phrase.value = '';
-        }
-    );
+        toggleLoading();
+    });
 }
 
 /* Region click handler for the entry list */

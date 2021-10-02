@@ -29,7 +29,7 @@ def before_request_func():
 
 @app.errorhandler(404)
 def not_found_view(e):
-    return render_template('not-found.html')
+    return render_template('not-found.html'), 404
 
 ## Front-end Layer
 @app.route('/')
@@ -217,7 +217,7 @@ def api_repo_patch(access_key):
         db.session.commit()
         return jsonify(message='success', repo=repo.to_json())
 
-@app.route('/api/repo/<access_key>/entries/new', methods=['POST'])
+@app.route('/api/repo/<access_key>/entries', methods=['POST'])
 def api_repo_new_entries(access_key):
     """ API Route for creating new entries on a repo, requires auth. Incoming JSON Schema:
     { 'new' : [ {entry_data}, {entry_data}, ...] }

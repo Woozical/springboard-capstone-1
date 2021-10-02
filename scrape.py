@@ -23,6 +23,7 @@ def get_tags(url:str):
     p_url = unquote(url)
     pr = urlparse(p_url)
     tags = {}
+
     # Missing/incorrect schema
     if not pr.scheme :
         p_url = "http://" + p_url
@@ -36,6 +37,7 @@ def get_tags(url:str):
             return {'title' : p_url, 'image' : p_url, 'url' : p_url}
         elif 'text/html' in res.headers['content-type']:
             tags = parse_HTML(res.text)
+            print(tags)
             # Make OpenGraph.io API call if we got a good connection but incomplete tags
             if res.status_code == 200 and incomplete(tags):
                 og_tags = opengraphIO_scrape(quote(p_url, safe=''))
@@ -44,7 +46,8 @@ def get_tags(url:str):
                 tags['image'] = og_tags.get('image', tags.get('image'))
                 tags['site_name'] = og_tags.get('site_name', tags.get('site_name'))
                 tags['url'] = og_tags.get('url', tags.get('url'))
-                return tags
+            
+            return tags
         else:
             return {'title' : p_url}
     except ConnectionError:

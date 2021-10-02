@@ -94,13 +94,15 @@ function initEditEventListeners(repo){
     newLinkForm.addEventListener('submit', (evt) => {
         evt.preventDefault();
         const links = newLinkForm.new.value;
-        if (links){
-            for (let link of links.split('\n')){
+        let changesMade = false;
+        for (let link of links.split('\n')){
+            if (link){
                 repo.addLink(link);
+                changesMade = true;
             }
-            alertSave();
-            newLinkForm.new.value = '';
         }
+        if (changesMade) alertSave();
+        newLinkForm.new.value = '';
     });
 
     repoEditForm.addEventListener('submit', (evt) => {
